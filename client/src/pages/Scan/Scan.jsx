@@ -319,7 +319,7 @@ export default function Scan() {
     }
   }
 
-  const handleBarcodeLookup = async (forcedCode) => {
+  const handleBarcodeLookup = async (forcedCode, isFromImageUpload = false) => {
     const codeVal = typeof forcedCode === 'string' ? forcedCode : barcodeValue
     if (!codeVal.trim()) {
       setError(currentCulture === 'fr' ? 'Le code-barres est requis' : 'Barcode is required')
@@ -360,6 +360,11 @@ export default function Scan() {
       }
     } catch (err) {
       setError(err.response?.data?.message || (currentCulture === 'fr' ? 'Produit non trouvé' : 'Barcode not found'))
+      // If the product lookup failed and it was from an image upload, reset/keep mode as 'image' and clear captured image
+      if (isFromImageUpload) {
+        setBarcodeMode('image')
+        setCapturedImage(null)
+      }
     } finally {
       setLocalLoading(false)
     }
@@ -385,14 +390,13 @@ export default function Scan() {
         if (result) {
           const code = result.getText()
           setBarcodeValue(code)
-          setBarcodeMode('manual')
-          await handleBarcodeLookup(code)
+          await handleBarcodeLookup(code, true)
         }
       } catch (err) {
         console.error("Barcode decoding failed:", err)
         setError(currentCulture === 'fr' ? 'Impossible de lire le code-barres. Essayez de le saisir manuellement.' : 'Could not read a valid barcode from the image. Please try typing it manually.')
         setCapturedImage(null)
-        setBarcodeMode('manual')
+        setBarcodeMode('manual') // Only redirect to manual/type mode when image is blurry / decoding fails
       } finally {
         setLocalLoading(false)
       }

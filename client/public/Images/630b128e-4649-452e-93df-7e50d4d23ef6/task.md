@@ -1,0 +1,5 @@
+- `[x]` Update `Onboarding.jsx` to support 7 steps
+- `[x]` Redesign Step 2 UI in `Onboarding.jsx` (Gender, Inputs, Unit Toggle)
+- `[x]` Add Step 7 (Allergies) in `Onboarding.jsx`
+- `[x]` Add CSS for Step 2 and Step 7 in `Onboarding.module.css`
+- `[x]` Verify changes on mobile view

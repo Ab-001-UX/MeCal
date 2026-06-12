@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="MeCal">
+  <defs>
+    <!-- Rich deep premium green background gradient -->
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#12683B"/>
+      <stop offset="100%" stop-color="#073E21"/>
+    </linearGradient>
+    
+    <!-- Glowing calorie progress ring gradient -->
+    <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#A5FCD2"/>
+      <stop offset="100%" stop-color="#2BDC76"/>
+    </linearGradient>
+
+    <!-- Semi-transparent glowing leaf gradient -->
+    <linearGradient id="leafGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0D4B2A" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#2BDC76" stop-opacity="0.55"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded green square background -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+
+  <!-- Calorie/activity tracking progress ring (Apple Activity Ring style) -->
+  <circle cx="256" cy="256" r="160" fill="none" stroke="white" stroke-width="12" opacity="0.12"/>
+  <path d="M 256 96 A 160 160 0 1 1 120 338" fill="none" stroke="url(#ringGradient)" stroke-width="18" stroke-linecap="round"/>
+
+  <!-- Sleek leaf shape behind the fork representing nutrition/calories -->
+  <path d="M 150 350 
+           C 150 210, 240 130, 350 130
+           C 310 240, 220 330, 150 350 Z" 
+        fill="url(#leafGradient)"/>
+
+  <!-- Elegant modern fork - sleek curved profile with clean lines -->
+  <path d="M 210 125
+           C 210 115, 230 115, 230 125
+           L 230 185
+           C 230 195, 240 195, 240 185
+           L 240 105
+           C 240 95, 272 95, 272 105
+           L 272 185
+           C 272 195, 282 195, 282 185
+           L 282 125
+           C 282 115, 302 115, 302 125
+           L 302 195
+           C 302 240, 268 250, 264 265
+           L 264 365
+           C 264 380, 248 380, 248 365
+           L 248 265
+           C 244 250, 210 240, 210 195 Z" 
+        fill="white"/>
+
+  <!-- Energetic calorie stars/sparks representing energy/calories -->
+  <path d="M 370 175 Q 380 175 380 165 Q 380 175 390 175 Q 380 175 380 185 Q 380 175 370 175 Z" fill="#A5FCD2"/>
+  <path d="M 125 215 Q 131 215 131 209 Q 131 215 137 215 Q 131 215 131 221 Q 131 215 125 215 Z" fill="#A5FCD2" opacity="0.7"/>
+</svg>

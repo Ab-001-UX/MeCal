@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id               String      @id @default(uuid())
+  name             String
+  phoneNumber      String      @unique
+  password         String
+  age              Int?
+  height           Float?
+  weight           Float?
+  targetWeight     Float?
+  unitPreference   String      @default("kg")
+  gender           String?
+  goal             String?
+  targetDuration   String?
+  country          String?
+  tribe            String?
+  lifestyleType    String?
+  budgetPreference String?
+  foodAvailability String?
+  activityLevel    String?
+  waterPreference  String      @default("sachet")
+  allergies        String?
+  otherAllergies   String?
+  calorieGoal      Int?
+  waterGoal        Int?
+  stepGoal         Int?
+  meals            Meal[]
+  waterLogs        WaterLog[]
+  activities       Activity[]
+  savedMeals       SavedMeal[]
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+}
+
+model SavedMeal {
+  id        String   @id @default(uuid())
+  name      String
+  calories  Float
+  protein   Float?
+  carbs     Float?
+  fat       Float?
+  imageUrl  String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Meal {
+  id        String   @id @default(uuid())
+  name      String
+  calories  Float
+  protein   Float?
+  carbs     Float?
+  fat       Float?
+  imageUrl  String?
+  type      String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model WaterLog {
+  id        String   @id @default(uuid())
+  amount    Int      @default(1)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Activity {
+  id        String   @id @default(uuid())
+  type      String   // "Steps", "Dancing", "Jogging", "Workout"
+  value     Float    // Count of steps or active minutes
+  calories  Float    // Calories burned
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}

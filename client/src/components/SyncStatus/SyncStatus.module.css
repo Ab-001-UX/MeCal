@@ -1,0 +1,46 @@
+.banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+.clearBtn {
+  background: rgba(12, 84, 96, 0.1);
+  border: 1px solid rgba(12, 84, 96, 0.2);
+  color: #0C5460;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clearBtn:hover {
+  background: rgba(12, 84, 96, 0.2);
+  border-color: rgba(12, 84, 96, 0.4);
+}
+
+.offline {
+  background: #FFF3CD;
+  color: #856404;
+}
+
+.pending {
+  background: #D1ECF1;
+  color: #0C5460;
+}
+
+.syncing {
+  background: #E2E3FF;
+  color: #383D7C;
+}

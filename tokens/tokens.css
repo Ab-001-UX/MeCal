@@ -1,0 +1,258 @@
+:root {
+  /* Typography */
+  --font-display-large-ss-font-size: 64px;
+  --font-display-large-ss-text-decoration: none;
+  --font-display-large-ss-font-family: "DM Sans";
+  --font-display-large-ss-font-weight: 700;
+  --font-display-large-ss-font-style: normal;
+  --font-display-large-ss-font-stretch: normal;
+  --font-display-large-ss-letter-spacing: -1.28px;
+  --font-display-large-ss-line-height: 96px;
+  --font-display-large-ss-paragraph-indent: 0px;
+  --font-display-large-ss-paragraph-spacing: 0px;
+  --font-display-large-ss-text-case: none;
+
+  --font-display-medium-font-size: 56px;
+  --font-display-medium-text-decoration: none;
+  --font-display-medium-font-family: "DM Sans";
+  --font-display-medium-font-weight: 700;
+  --font-display-medium-font-style: normal;
+  --font-display-medium-font-stretch: normal;
+  --font-display-medium-letter-spacing: -1.12px;
+  --font-display-medium-line-height: 84px;
+  --font-display-medium-paragraph-indent: 0px;
+  --font-display-medium-paragraph-spacing: 0px;
+  --font-display-medium-text-case: none;
+
+  --font-display-small-font-size: 44px;
+  --font-display-small-text-decoration: none;
+  --font-display-small-font-family: "DM Sans";
+  --font-display-small-font-weight: 700;
+  --font-display-small-font-style: normal;
+  --font-display-small-font-stretch: normal;
+  --font-display-small-letter-spacing: -0.88px;
+  --font-display-small-line-height: 66px;
+  --font-display-small-paragraph-indent: 0px;
+  --font-display-small-paragraph-spacing: 0px;
+  --font-display-small-text-case: none;
+
+  --font-headline-large-font-size: 40px;
+  --font-headline-large-text-decoration: none;
+  --font-headline-large-font-family: "DM Sans";
+  --font-headline-large-font-weight: 600;
+  --font-headline-large-font-style: normal;
+  --font-headline-large-font-stretch: normal;
+  --font-headline-large-letter-spacing: -0.8px;
+  --font-headline-large-line-height: 60px;
+  --font-headline-large-paragraph-indent: 0px;
+  --font-headline-large-paragraph-spacing: 0px;
+  --font-headline-large-text-case: none;
+
+  --font-headline-medium-font-size: 36px;
+  --font-headline-medium-text-decoration: none;
+  --font-headline-medium-font-family: "DM Sans";
+  --font-headline-medium-font-weight: 600;
+  --font-headline-medium-font-style: normal;
+  --font-headline-medium-font-stretch: normal;
+  --font-headline-medium-letter-spacing: -0.72px;
+  --font-headline-medium-line-height: 54px;
+  --font-headline-medium-paragraph-indent: 0px;
+  --font-headline-medium-paragraph-spacing: 0px;
+  --font-headline-medium-text-case: none;
+
+  --font-headline-small-font-size: 28px;
+  --font-headline-small-text-decoration: none;
+  --font-headline-small-font-family: "DM Sans";
+  --font-headline-small-font-weight: 600;
+  --font-headline-small-font-style: normal;
+  --font-headline-small-font-stretch: normal;
+  --font-headline-small-letter-spacing: -0.56px;
+  --font-headline-small-line-height: 42px;
+  --font-headline-small-paragraph-indent: 0px;
+  --font-headline-small-paragraph-spacing: 0px;
+  --font-headline-small-text-case: none;
+
+  --font-title-large-font-size: 26px;
+  --font-title-large-text-decoration: none;
+  --font-title-large-font-family: "DM Sans";
+  --font-title-large-font-weight: 500;
+  --font-title-large-font-style: normal;
+  --font-title-large-font-stretch: normal;
+  --font-title-large-letter-spacing: -0.52px;
+  --font-title-large-line-height: 39px;
+  --font-title-large-paragraph-indent: 0px;
+  --font-title-large-paragraph-spacing: 0px;
+  --font-title-large-text-case: none;
+
+  --font-title-medium-font-size: 22px;
+  --font-title-medium-text-decoration: none;
+  --font-title-medium-font-family: "DM Sans";
+  --font-title-medium-font-weight: 500;
+  --font-title-medium-font-style: normal;
+  --font-title-medium-font-stretch: normal;
+  --font-title-medium-letter-spacing: -0.44px;
+  --font-title-medium-line-height: 33px;
+  --font-title-medium-paragraph-indent: 0px;
+  --font-title-medium-paragraph-spacing: 0px;
+  --font-title-medium-text-case: none;
+
+  --font-title-small-font-size: 18px;
+  --font-title-small-text-decoration: none;
+  --font-title-small-font-family: "DM Sans";
+  --font-title-small-font-weight: 500;
+  --font-title-small-font-style: normal;
+  --font-title-small-font-stretch: normal;
+  --font-title-small-letter-spacing: -0.36px;
+  --font-title-small-line-height: 27px;
+  --font-title-small-paragraph-indent: 0px;
+  --font-title-small-paragraph-spacing: 0px;
+  --font-title-small-text-case: none;
+
+  --font-body-large-font-size: 18px;
+  --font-body-large-text-decoration: none;
+  --font-body-large-font-family: "Poppins";
+  --font-body-large-font-weight: 400;
+  --font-body-large-font-style: normal;
+  --font-body-large-font-stretch: normal;
+  --font-body-large-letter-spacing: -0.36px;
+  --font-body-large-line-height: 27px;
+  --font-body-large-paragraph-indent: 0px;
+  --font-body-large-paragraph-spacing: 0px;
+  --font-body-large-text-case: none;
+
+  --font-body-medium-font-size: 16px;
+  --font-body-medium-text-decoration: none;
+  --font-body-medium-font-family: "Poppins";
+  --font-body-medium-font-weight: 400;
+  --font-body-medium-font-style: normal;
+  --font-body-medium-font-stretch: normal;
+  --font-body-medium-letter-spacing: -0.32px;
+  --font-body-medium-line-height: 24px;
+  --font-body-medium-paragraph-indent: 0px;
+  --font-body-medium-paragraph-spacing: 0px;
+  --font-body-medium-text-case: none;
+
+  --font-body-small-font-size: 14px;
+  --font-body-small-text-decoration: none;
+  --font-body-small-font-family: "Poppins";
+  --font-body-small-font-weight: 400;
+  --font-body-small-font-style: normal;
+  --font-body-small-font-stretch: normal;
+  --font-body-small-letter-spacing: -0.28px;
+  --font-body-small-line-height: 21px;
+  --font-body-small-paragraph-indent: 0px;
+  --font-body-small-paragraph-spacing: 0px;
+  --font-body-small-text-case: none;
+
+  --font-label-large-font-size: 20px;
+  --font-label-large-text-decoration: none;
+  --font-label-large-font-family: "Poppins";
+  --font-label-large-font-weight: 600;
+  --font-label-large-font-style: normal;
+  --font-label-large-font-stretch: normal;
+  --font-label-large-letter-spacing: -0.4px;
+  --font-label-large-line-height: 30px;
+  --font-label-large-paragraph-indent: 0px;
+  --font-label-large-paragraph-spacing: 0px;
+  --font-label-large-text-case: none;
+
+  --font-label-medium-font-size: 18px;
+  --font-label-medium-text-decoration: none;
+  --font-label-medium-font-family: "Poppins";
+  --font-label-medium-font-weight: 600;
+  --font-label-medium-font-style: normal;
+  --font-label-medium-font-stretch: normal;
+  --font-label-medium-letter-spacing: -0.36px;
+  --font-label-medium-line-height: 27px;
+  --font-label-medium-paragraph-indent: 0px;
+  --font-label-medium-paragraph-spacing: 0px;
+  --font-label-medium-text-case: none;
+
+  --font-label-small-font-size: 16px;
+  --font-label-small-text-decoration: none;
+  --font-label-small-font-family: "Poppins";
+  --font-label-small-font-weight: 600;
+  --font-label-small-font-style: normal;
+  --font-label-small-font-stretch: normal;
+  --font-label-small-letter-spacing: -0.32px;
+  --font-label-small-line-height: 24px;
+  --font-label-small-paragraph-indent: 0px;
+  --font-label-small-paragraph-spacing: 0px;
+  --font-label-small-text-case: none;
+
+  /* Color Roles - Light Theme */
+  --color-primary: hsl(225, 79%, 52%);
+  --color-on-primary: hsl(0, 0%, 100%);
+  --color-primary-container: hsl(229, 100%, 86%);
+  --color-on-primary-container: hsl(222, 100%, 36%);
+  --color-secondary: hsl(192, 100%, 25%);
+  --color-on-secondary: hsl(0, 0%, 100%);
+  --color-secondary-container: hsl(196, 99%, 68%);
+  --color-on-secondary-container: hsl(193, 100%, 19%);
+  --color-tertiary: hsl(265, 34%, 46%);
+  --color-on-tertiary: hsl(0, 0%, 100%);
+  --color-tertiary-container: hsl(267, 100%, 86%);
+  --color-on-tertiary-container: hsl(266, 43%, 36%);
+  --color-error: hsl(355, 100%, 38%);
+  --color-on-error: hsl(0, 0%, 100%);
+  --color-error-container: hsl(6, 100%, 84%);
+  --color-on-error-container: hsl(356, 100%, 29%);
+  --color-background: hsl(0, 0%, 99%);
+  --color-on-background: hsl(207, 7%, 13%);
+  --color-surface: hsl(0, 0%, 99%);
+  --color-on-surface: hsl(207, 7%, 13%);
+  --color-surface-variant: hsl(223, 17%, 92%);
+  --color-on-surface-variant: hsl(220, 9%, 46%);
+  --color-outline: hsl(218, 15%, 86%);
+  --color-outline-variant: hsl(214, 64%, 81%);
+  --color-inverse-surface: hsl(223, 20%, 21%);
+  --color-inverse-on-surface: hsl(230, 100%, 96%);
+  --color-inverse-primary: hsl(229, 100%, 86%);
+  --color-surface-dim: hsl(226, 41%, 88%);
+  --color-surface-bright: hsl(0, 0%, 99%);
+  --color-surface-container-lowest: hsl(0, 0%, 100%);
+  --color-surface-container-low: hsl(231, 100%, 97%);
+  --color-surface-container: hsl(229, 100%, 96%);
+  --color-surface-container-high: hsl(226, 76%, 94%);
+  --color-surface-container-highest: hsl(228, 55%, 91%);
+}
+
+/* Color Roles - Dark Theme */
+[data-theme="dark"] {
+  --color-primary: hsl(225, 79%, 52%);
+  --color-on-primary: hsl(223, 100%, 26%);
+  --color-primary-container: hsl(222, 100%, 36%);
+  --color-on-primary-container: hsl(233, 100%, 93%);
+  --color-secondary: hsl(196, 99%, 68%);
+  --color-on-secondary: hsl(193, 100%, 13%);
+  --color-secondary-container: hsl(193, 100%, 19%);
+  --color-on-secondary-container: hsl(198, 100%, 86%);
+  --color-tertiary: hsl(267, 100%, 86%);
+  --color-on-tertiary: hsl(266, 57%, 27%);
+  --color-tertiary-container: hsl(266, 43%, 36%);
+  --color-on-tertiary-container: hsl(269, 100%, 93%);
+  --color-error: hsl(6, 100%, 84%);
+  --color-on-error: hsl(358, 100%, 21%);
+  --color-error-container: hsl(356, 100%, 29%);
+  --color-on-error-container: hsl(7, 100%, 92%);
+  
+  /* Fallbacks for missing tokens in neutral palette */
+  --color-background: hsl(207, 7%, 13%); /* Fallback for neutral.6 */
+  --color-on-background: hsl(228, 55%, 91%);
+  --color-surface: hsl(207, 7%, 13%); /* Fallback for neutral.6 */
+  --color-on-surface: hsl(228, 55%, 91%);
+  --color-surface-variant: hsl(220, 9%, 46%);
+  --color-on-surface-variant: hsl(214, 64%, 81%);
+  --color-outline: hsl(213, 29%, 59%);
+  --color-outline-variant: hsl(220, 9%, 46%);
+  --color-inverse-surface: hsl(228, 55%, 91%);
+  --color-inverse-on-surface: hsl(223, 20%, 21%);
+  --color-inverse-primary: hsl(224, 78%, 49%);
+  --color-surface-dim: hsl(207, 7%, 13%); /* Fallback for neutral.6 */
+  --color-surface-bright: hsl(223, 17%, 25%); /* Fallback for neutral.24 */
+  --color-surface-container-lowest: hsl(0, 0%, 0%); /* Fallback for neutral.4 */
+  --color-surface-container-low: hsl(207, 7%, 13%);
+  --color-surface-container: hsl(207, 7%, 13%); /* Fallback for neutral.12 */
+  --color-surface-container-high: hsl(223, 20%, 21%); /* Fallback for neutral.17 */
+  --color-surface-container-highest: hsl(223, 20%, 21%); /* Fallback for neutral.22 */
+}

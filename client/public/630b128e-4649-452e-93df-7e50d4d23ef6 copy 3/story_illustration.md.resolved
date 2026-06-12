@@ -1,0 +1,7 @@
+# Your MeCal Success Story Illustration
+
+Here is the vector illustration telling the story of the young Nigerian girl's journey with MeCal:
+
+![MeCal Journey](/C:/Users/MONSURAT/.gemini/antigravity/brain/630b128e-4649-452e-93df-7e50d4d23ef6/onboarding_story_single_1778472718790.png)
+
+Please let me know if you like this style and if you'd like me to set this as the background for the Login page!

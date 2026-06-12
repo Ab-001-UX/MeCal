@@ -1,0 +1,40 @@
+# Implementation Plan - Rebuild MeCal from Scratch (PRD Compliant)
+
+I have read the PRD thoroughly. I now understand the vision: a localized, emotionally supportive, private wellness companion with features like sachet/bottled water tracking, manual step check-ins with device guides, tribe-aware recommendations, and a Blob companion. 
+
+I will rebuild the app starting with the **Home Page** to establish the "premium-soft wellness" aesthetic and core feature layout.
+
+## User Review Required
+
+> [!IMPORTANT]
+> I will use the colors from `tokens/tokens.css` as requested in the previous turn, but I will apply them to the new PRD-compliant layout. Please let me know if you want to start with the **Onboarding Flow** instead of the **Home Page**.
+
+## Proposed Changes
+
+### 1. Design System & Layout
+
+#### [MODIFY] [tokens.css](file:///c:/Users/MONSURAT/OneDrive/Desktop/MeCal/client/src/styles/tokens.css)
+- Update to use the HSL values from `tokens/tokens.css`.
+- Ensure we have a "premium-soft" feel (soft shadows, calm colors, rounded corners).
+
+#### [MODIFY] [Layout.jsx](file:///c:/Users/MONSURAT/OneDrive/Desktop/MeCal/client/src/components/Layout/Layout.jsx) (or create if missing)
+- Implement the Bottom Navigation: Home, Scan, History, Profile.
+
+### 2. Home Page Rebuild
+
+#### [MODIFY] [Home.jsx](file:///c:/Users/MONSURAT/OneDrive/Desktop/MeCal/client/src/pages/Home/Home.jsx)
+- **Blob Companion**: Add a visual placeholder for the Blob companion (calm, supportive).
+- **Calorie Tracker**: Visual progress bar for calories (35% weight).
+- **Hydration Tracker**: Support for Sachet/Bottled water icons (25% weight).
+- **Movement Guide**: Display step goal and the "Yes, I did / Not today" check-in (25% weight).
+- **Daily Completion Score**: Visual indicator of total progress (e.g., "78% completed").
+
+#### [MODIFY] [Home.module.css](file:///c:/Users/MONSURAT/OneDrive/Desktop/MeCal/client/src/pages/Home/Home.module.css)
+- Implement a clean, spacious, "premium-soft" style.
+- Use smooth gradients and soft shadows.
+
+## Verification Plan
+
+### Manual Verification
+- Run the dev server and verify that the Home page matches the PRD descriptions (Blob, Sachet/Bottle water, Step check-in).
+- Verify the look and feel is "premium-soft wellness".

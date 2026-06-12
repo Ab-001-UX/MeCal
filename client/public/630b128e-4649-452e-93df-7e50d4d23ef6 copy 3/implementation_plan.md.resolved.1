@@ -1,0 +1,34 @@
+# Implementation Plan - Use tokens.css and Redesign From Scratch
+
+The user wants to use the color palette defined in `tokens/tokens.css` and restart the design from scratch to create a premium, visually appealing interface.
+
+## User Review Required
+
+> [!NOTE]
+> I will use the colors from `tokens/tokens.css` (the blue/purple palette) as requested. Since the components currently use semantic names like `--color-bg-soft` and `--color-primary-soft` which are not in `tokens/tokens.css`, I will create a mapping in `client/src/styles/tokens.css` to use the values from `tokens/tokens.css` without breaking the app.
+
+## Proposed Changes
+
+### Design System
+
+#### [MODIFY] [tokens.css](file:///c:/Users/MONSURAT/OneDrive/Desktop/MeCal/client/src/styles/tokens.css)
+- Update to use the color values from `tokens/tokens.css` (HSL values).
+- Provide mappings for `--color-primary`, `--color-bg-soft`, etc., based on the new palette.
+
+### Components & Pages
+
+#### [MODIFY] [Home.jsx](file:///c:/Users/MONSURAT/OneDrive/Desktop/MeCal/client/src/pages/Home/Home.jsx)
+- Redesign the layout and styling to be more "premium" and dynamic.
+- Add micro-animations and smooth gradients.
+- Implement the "no pictures" requirement with rich aesthetics (gradients, patterns, glassmorphism) if appropriate, or add high-quality images if the user clarifies they want them.
+
+#### [MODIFY] [Home.module.css](file:///c:/Users/MONSURAT/OneDrive/Desktop/MeCal/client/src/pages/Home/Home.module.css)
+- Update styles to reflect the new design and use the mapped tokens.
+
+## Verification Plan
+
+### Automated Tests
+- Ensure the app builds and runs without errors.
+
+### Manual Verification
+- View the app in the browser to verify the new design looks premium and uses the correct colors from `tokens/tokens.css`.

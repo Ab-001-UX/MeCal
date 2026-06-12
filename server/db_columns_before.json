@@ -1,0 +1,106 @@
+[
+  {
+    "column_name": "id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "phoneNumber",
+    "data_type": "text"
+  },
+  {
+    "column_name": "password",
+    "data_type": "text"
+  },
+  {
+    "column_name": "age",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "height",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "weight",
+    "data_type": "double precision"
+  },
+  {
+    "column_name": "unitPreference",
+    "data_type": "text"
+  },
+  {
+    "column_name": "gender",
+    "data_type": "text"
+  },
+  {
+    "column_name": "goal",
+    "data_type": "text"
+  },
+  {
+    "column_name": "targetDuration",
+    "data_type": "text"
+  },
+  {
+    "column_name": "country",
+    "data_type": "text"
+  },
+  {
+    "column_name": "tribe",
+    "data_type": "text"
+  },
+  {
+    "column_name": "lifestyleType",
+    "data_type": "text"
+  },
+  {
+    "column_name": "budgetPreference",
+    "data_type": "text"
+  },
+  {
+    "column_name": "foodAvailability",
+    "data_type": "text"
+  },
+  {
+    "column_name": "activityLevel",
+    "data_type": "text"
+  },
+  {
+    "column_name": "waterPreference",
+    "data_type": "text"
+  },
+  {
+    "column_name": "allergies",
+    "data_type": "text"
+  },
+  {
+    "column_name": "otherAllergies",
+    "data_type": "text"
+  },
+  {
+    "column_name": "calorieGoal",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "waterGoal",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "stepGoal",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "createdAt",
+    "data_type": "timestamp without time zone"
+  },
+  {
+    "column_name": "updatedAt",
+    "data_type": "timestamp without time zone"
+  },
+  {
+    "column_name": "targetWeight",
+    "data_type": "double precision"
+  }
+]

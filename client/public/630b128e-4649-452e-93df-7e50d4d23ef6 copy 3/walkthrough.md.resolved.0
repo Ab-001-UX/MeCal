@@ -1,0 +1,29 @@
+# Walkthrough - MeCal Home Page Rebuild
+
+I have rebuilt the MeCal Home Page from scratch to align with the Product Requirements Document (PRD) and the "premium-soft wellness" aesthetic you requested.
+
+## Changes Made
+
+### Design System
+- Updated `client/src/styles/tokens.css` with the colors from `tokens/tokens.css` (the blue/purple palette).
+- Created semantic mappings (e.g., `--color-bg-soft`, `--color-primary-soft`) to maintain component compatibility while switching to the new colors.
+
+### Home Page (`Home.jsx`)
+- **Blob Companion**: Added a visual blob with floating animation and mood changes based on completion score.
+- **Calorie Tracker**: Refactored to use the new tokens and clean layout.
+- **Hydration Tracker**: Implemented support for sachet (50cl) and bottle (75cl) tracking with clickable icons.
+- **Movement Card**: Added the manual step goal check-in ("Yes, I did" / "Not today") and a link to the device guide.
+- **Daily Completion Score**: Added a calculation for total score combining calories, hydration, and steps.
+
+### Styling (`Home.module.css`)
+- Applied a "premium-soft" design with soft shadows, rounded corners, and gradients.
+- Added floating animation for the Blob companion.
+
+## Verification
+
+### Automated
+- The client and server are running successfully (verified via terminal status).
+
+### Manual
+- I attempted to verify the page in the browser, but it requires login (`http://localhost:3000/login`). I cannot bypass the login screen to view the Home page without credentials.
+- Please log in and verify that the Home page looks as you expect!

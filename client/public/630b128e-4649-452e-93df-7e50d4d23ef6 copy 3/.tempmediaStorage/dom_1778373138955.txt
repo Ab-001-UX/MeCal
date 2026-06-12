@@ -1,0 +1,12 @@
+[0] (500,500)<div  />
+	Welcome Back
+	Login to access your private account.
+	[1] (500,351)<label >Phone Number />
+	[2] (500,413)<input class='_input_jluo6_60' id='phoneNumber' placeholder='080XXXXXXXX' />
+	[3] (500,495)<label >Password />
+	[4] (500,557)<input class='_input_jluo6_60' id='password' placeholder='••••••••' />
+	[5] (619,557)<button class='_eyeButton_jluo6_84'>👁️ />
+	[6] (597,639)<a class='_link_jluo6_101' href='/forgot-password'>Forgot Password? />
+	[7] (500,721)<button class='_button_jluo6_112'>Log In />
+	Don't have an account?
+	[8] (553,815)<a class='_link_jluo6_101' href='/onboard'>Create Account />

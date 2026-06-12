@@ -1,0 +1,182 @@
+@import url('https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap');
+
+.container {
+  position: relative;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: #121212;
+}
+
+.slideshow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  z-index: 0;
+}
+
+.slide {
+  flex: 0 0 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Removed black gradient overlay */
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: var(--space-3);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  align-items: center;
+  text-align: center;
+  background: transparent;
+  padding: var(--space-4);
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.logo {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 10;
+  font-size: 2.2rem;
+  font-weight: normal;
+  color: var(--color-primary);
+  font-family: 'Grand Hotel', cursive;
+
+}
+
+.ctaWrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.fullCtaBtn {
+  width: 100%;
+  padding: var(--space-4);
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.fullCtaBtn:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.getStartedBtn:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.loginText {
+  font-size: var(--font-size-sm);
+  color: #FFFFFF;
+}
+
+.link {
+  color: var(--color-primary);
+  text-decoration: underline;
+  font-weight: var(--font-weight-bold);
+}
+
+/* Added Styles */
+.textWrapper {
+  margin-top: var(--space-10);
+  margin-bottom: auto;
+}
+
+.title {
+  color: #FFFFFF !important;
+  font-size: 3.5rem !important;
+  font-weight: normal !important;
+  font-family: 'Grand Hotel', cursive !important;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  margin-bottom: var(--space-1);
+}
+
+.subtitle {
+  color: #FFFFFF !important;
+  font-size: 1rem !important;
+  opacity: 0.9 !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.dotsWrapper {
+  display: flex;
+  gap: 8px;
+  margin-bottom: var(--space-4);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background-color: rgba(255,255,255,0.5);
+  transition: all 0.3s ease;
+}
+
+.dot.activeDot {
+  width: 24px;
+  background-color: var(--color-primary);
+}
+
+/* Language Dropdown */
+.langToggleWrapper {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
+}
+
+.langSelect {
+  background-color: #FFFFFF; /* Solid white to not blend */
+  color: #121212;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  border: 1px solid #E0E0E0;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  appearance: none; /* Remove default arrow */
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23121212' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 16px;
+  padding-right: 40px; /* Extra space for arrow */
+  transition: all 0.2s ease;
+}
+
+.langSelect:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}

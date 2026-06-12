@@ -1,0 +1,6 @@
+- `[ ]` Create `Welcome.jsx` and `Welcome.module.css`
+- `[ ]` Move sliding story to `Welcome.jsx` and add CTAs
+- `[ ]` Regenerate Scene 6 image with "6 Months Later" text
+- `[ ]` Update `Login.jsx` to remove sliding story
+- `[ ]` Update routing in `App.jsx` to include Welcome page
+- `[ ]` Adjust CSS to zoom in images as requested

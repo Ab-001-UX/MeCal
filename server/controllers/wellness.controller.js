@@ -82,7 +82,17 @@ async function fetchUnsplashImage(topic = '') {
     return resolveImageFallback(topic)
   }
   try {
-    const query    = encodeURIComponent(`${topic} west african food`)
+    let cleanTopic = topic.trim();
+    const lower = cleanTopic.toLowerCase();
+    if (lower === 'zobo' || lower === 'bissap') {
+      cleanTopic = 'hibiscus tea';
+    } else if (lower.includes('zobo')) {
+      cleanTopic = cleanTopic.replace(/zobo/gi, 'hibiscus drink');
+    } else if (lower.includes('bissap')) {
+      cleanTopic = cleanTopic.replace(/bissap/gi, 'hibiscus drink');
+    }
+
+    const query    = encodeURIComponent(`${cleanTopic} west african food`)
     const url      = `https://api.unsplash.com/search/photos?query=${query}&per_page=1&orientation=landscape&content_filter=high`
     const response = await fetch(url, {
       headers: { Authorization: `Client-ID ${UNSPLASH_KEY}` }

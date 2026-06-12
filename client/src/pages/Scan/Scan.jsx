@@ -38,7 +38,10 @@ const i18n = {
     fixResults: "Fix Results",
     save: "Save",
     cameraDenied: "Camera access denied or not available.",
-    tapLibrary: "Tap Library to upload or Manual to type."
+    tapLibrary: "Tap Library to upload or Manual to type.",
+    cancel: "Cancel",
+    saveEdits: "Save Edits",
+    editInstruction: "Edit the food name, calories and macros below:"
   },
   fr: {
     nutrition: "Nutrition",
@@ -67,7 +70,10 @@ const i18n = {
     fixResults: "Corriger",
     save: "Enregistrer",
     cameraDenied: "Accès caméra refusé ou non disponible.",
-    tapLibrary: "Appuyez sur Bibliothèque pour importer ou Manuel pour taper."
+    tapLibrary: "Appuyez sur Bibliothèque pour importer ou Manuel pour taper.",
+    cancel: "Annuler",
+    saveEdits: "Enregistrer",
+    editInstruction: "Modifiez le nom de l'aliment, les calories et les macros ci-dessous :"
   }
 }
 
@@ -566,7 +572,7 @@ export default function Scan() {
           <X size={24} color="white" />
         </button>
         <span className={styles.topBarTitle}>
-          {showResults ? i18n[language].nutrition : (currentCulture === 'fr' ? 'Photo' : 'Photo Log')}
+          {showResults ? i18n[currentCulture].nutrition : (currentCulture === 'fr' ? 'Journal Photo' : 'Photo Log')}
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           {showResults ? (
@@ -936,7 +942,7 @@ export default function Scan() {
           <div className={styles.spinnerWrapper}>
             <div className={styles.orangeSpinner}></div>
           </div>
-          <p className={styles.loadingText}>{loadingActionText || i18n[language].fetching}</p>
+          <p className={styles.loadingText}>{loadingActionText || i18n[currentCulture].fetching}</p>
         </div>
       ) : !showResults ? (
         <div className={styles.controlsWrapper}>
@@ -946,19 +952,19 @@ export default function Scan() {
                 className={`${styles.tabBtn} ${activeTab === 'scan' ? styles.activeTab : ''}`}
                 onClick={() => setActiveTab('scan')}
               >
-                {i18n[language].scan}
+                {i18n[currentCulture].scan}
               </button>
               <button 
                 className={`${styles.tabBtn} ${activeTab === 'barcode' ? styles.activeTab : ''}`}
                 onClick={() => setActiveTab('barcode')}
               >
-                {i18n[language].barcode}
+                {i18n[currentCulture].barcode}
               </button>
               <button 
                 className={`${styles.tabBtn} ${activeTab === 'manual' ? styles.activeTab : ''}`}
                 onClick={() => setActiveTab('manual')}
               >
-                {i18n[language].manual}
+                {i18n[currentCulture].manual}
               </button>
           </div>
         </div>
@@ -984,14 +990,14 @@ export default function Scan() {
                   value={editedFoodName} 
                   onChange={(e) => setEditedFoodName(e.target.value)} 
                   className={styles.editFoodNameInput} 
-                  placeholder="Food Name"
+                  placeholder={currentCulture === 'fr' ? "Nom de l'aliment" : "Food Name"}
                 />
               ) : (
                 <h2>{scanResult?.foodName}</h2>
               )}
             </div>
             {isEditingResults ? (
-              <p className={styles.foodDescriptionEditing}>Edit the food name, calories and macros below:</p>
+              <p className={styles.foodDescriptionEditing}>{i18n[currentCulture].editInstruction}</p>
             ) : (
               <>
                 <p className={styles.foodDescription}>{scanResult?.description}</p>
@@ -1031,7 +1037,7 @@ export default function Scan() {
           {isEditingResults ? (
             <div className={styles.macrosEditGrid}>
               <div className={styles.editMacroBox}>
-                <label>Calories</label>
+                <label>{i18n[currentCulture].calories}</label>
                 <input 
                   type="number" 
                   value={editedCalories} 
@@ -1041,7 +1047,7 @@ export default function Scan() {
                 <span>kcal</span>
               </div>
               <div className={styles.editMacroBox}>
-                <label>Carbs</label>
+                <label>{i18n[currentCulture].carbs}</label>
                 <input 
                   type="number" 
                   value={editedCarbs} 
@@ -1051,7 +1057,7 @@ export default function Scan() {
                 <span>g</span>
               </div>
               <div className={styles.editMacroBox}>
-                <label>Protein</label>
+                <label>{i18n[currentCulture].protein}</label>
                 <input 
                   type="number" 
                   value={editedProtein} 
@@ -1061,7 +1067,7 @@ export default function Scan() {
                 <span>g</span>
               </div>
               <div className={styles.editMacroBox}>
-                <label>Fats</label>
+                <label>{i18n[currentCulture].fats}</label>
                 <input 
                   type="number" 
                   value={editedFat} 
@@ -1090,7 +1096,7 @@ export default function Scan() {
                     <span>{scanResult ? scanResult.calories * quantity : 0}</span>
                   </div>
                 </div>
-                <span className={styles.macroLabel}>Calories</span>
+                <span className={styles.macroLabel}>{i18n[currentCulture].calories}</span>
               </div>
 
               {/* Carbs */}
@@ -1110,7 +1116,7 @@ export default function Scan() {
                     <span>{scanResult ? scanResult.carbs * quantity : 0}g</span>
                   </div>
                 </div>
-                <span className={styles.macroLabel}>Carbs</span>
+                <span className={styles.macroLabel}>{i18n[currentCulture].carbs}</span>
               </div>
 
               {/* Protein */}
@@ -1130,7 +1136,7 @@ export default function Scan() {
                     <span>{scanResult ? scanResult.protein * quantity : 0}g</span>
                   </div>
                 </div>
-                <span className={styles.macroLabel}>Protein</span>
+                <span className={styles.macroLabel}>{i18n[currentCulture].protein}</span>
               </div>
 
               {/* Fats */}
@@ -1150,7 +1156,7 @@ export default function Scan() {
                     <span>{scanResult ? scanResult.fat * quantity : 0}g</span>
                   </div>
                 </div>
-                <span className={styles.macroLabel}>Fats</span>
+                <span className={styles.macroLabel}>{i18n[currentCulture].fats}</span>
               </div>
             </div>
           )}
@@ -1160,19 +1166,19 @@ export default function Scan() {
             {isEditingResults ? (
               <>
                 <button className={styles.cancelEditBtn} onClick={() => setIsEditingResults(false)}>
-                  Cancel
+                  {i18n[currentCulture].cancel}
                 </button>
                 <button className={styles.saveEditBtn} onClick={handleUpdateMeal}>
-                  Save Edits
+                  {i18n[currentCulture].saveEdits}
                 </button>
               </>
             ) : (
               <>
                 <button className={styles.fixBtn} onClick={() => setIsEditingResults(true)}>
-                  Fix Results
+                  {i18n[currentCulture].fixResults}
                 </button>
                 <button className={styles.saveBtn} onClick={handleSave}>
-                  Save
+                  {i18n[currentCulture].save}
                 </button>
               </>
             )}

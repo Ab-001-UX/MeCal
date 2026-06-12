@@ -1,15 +1,22 @@
 import { validateNutritionData, getFallbackData } from './nutrition.service.js';
 
 async function callGemini(prompt, retries = 2) {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error('GEMINI_API_KEY is not set');
+  let apiKey = process.env.GEMINI_API_KEY;
+  if (apiKey) apiKey = apiKey.replace(/['"]/g, '').trim();
+
+  if (!apiKey) {
+    console.warn('[AI] GEMINI_API_KEY is not set. Attempting Groq fallback immediately...');
+    return await callGroq(prompt);
+  }
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
   const payload = { contents: [{ parts: [{ text: prompt }] }] };
 
+  let lastError = null;
+
   for (let attempt = 0; attempt <= retries; attempt++) {
     const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout per attempt
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout per attempt
 
     try {
       const response = await fetch(url, {
@@ -36,13 +43,91 @@ async function callGemini(prompt, retries = 2) {
       return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
     } catch (error) {
       clearTimeout(timeoutId);
+      lastError = error;
       if (attempt < retries) {
         await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
         continue;
       }
-      throw error;
     }
   }
+
+  console.error('[AI] Gemini failed with error:', lastError?.message || lastError);
+  try {
+    console.log('[AI] Attempting Groq fallback...');
+    return await callGroq(prompt);
+  } catch (groqError) {
+    console.error('[AI] Groq fallback also failed:', groqError.message);
+    throw lastError;
+  }
+}
+
+async function callGroq(prompt) {
+  let groqKey = process.env.GROQ_API_KEY;
+  if (groqKey) groqKey = groqKey.replace(/['"]/g, '').trim();
+  if (!groqKey) throw new Error('GROQ_API_KEY is not set');
+
+  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${groqKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.7,
+      response_format: { type: "json_object" }
+    })
+  });
+
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Groq API error ${response.status}: ${err}`);
+  }
+
+  const data = await response.json();
+  return data.choices?.[0]?.message?.content || '';
+}
+
+async function callGroqVision(prompt, base64Data) {
+  let groqKey = process.env.GROQ_API_KEY;
+  if (groqKey) groqKey = groqKey.replace(/['"]/g, '').trim();
+  if (!groqKey) throw new Error('GROQ_API_KEY is not set');
+
+  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${groqKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: 'llama-3.2-11b-vision-preview',
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: prompt },
+            {
+              type: 'image_url',
+              image_url: {
+                url: `data:image/jpeg;base64,${base64Data}`
+              }
+            }
+          ]
+        }
+      ],
+      temperature: 0.2,
+      response_format: { type: "json_object" }
+    })
+  });
+
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Groq Vision API error ${response.status}: ${err}`);
+  }
+
+  const data = await response.json();
+  return data.choices?.[0]?.message?.content || '';
 }
 
 function parseJsonFromText(text) {
@@ -505,7 +590,8 @@ export async function getDailyMealPlan(profile, lang = 'en') {
 }
 
 export async function analyzeFoodImage(base64Image) {
-  const apiKey = process.env.GEMINI_API_KEY;
+  let apiKey = process.env.GEMINI_API_KEY;
+  if (apiKey) apiKey = apiKey.replace(/['"]/g, '').trim();
   if (!apiKey) {
     throw new Error('GEMINI_API_KEY is not set in environment variables');
   }
@@ -600,9 +686,36 @@ export async function analyzeFoodImage(base64Image) {
       fallbackUsed: false
     };
   } catch (error) {
-    console.error('Gemini Service Error:', error);
-    // Use fallback data on failure
-    const fallback = getFallbackData(); // Will return generic fallback
+    console.error('Gemini Image Scan Error:', error.message);
+    try {
+      console.log('[AI] Attempting Groq Vision fallback...');
+      const groqText = await callGroqVision(prompt, base64Data);
+      const jsonStr = groqText.replace(/```json|```/g, '').trim();
+      const result = JSON.parse(jsonStr);
+      const validation = validateNutritionData(result);
+      
+      if (validation.isValid) {
+        return {
+          foodName: result.foodName,
+          calories: result.calories,
+          macros: {
+            carbs: result.carbs,
+            protein: result.protein,
+            fat: result.fat
+          },
+          tribeTip: result.tribeTip,
+          confidence: 'Medium',
+          fallbackUsed: false,
+          source: 'groq_vision'
+        };
+      }
+      console.warn('[AI] Groq Vision data failed validation:', validation.errors);
+    } catch (groqError) {
+      console.error('[AI] Groq Vision fallback also failed:', groqError.message);
+    }
+
+    // Ultimate fallback to hardcoded data if both vision models fail
+    const fallback = getFallbackData();
     return {
       foodName: fallback.foodName,
       calories: fallback.calories,
@@ -624,7 +737,8 @@ function normalizeConfidence(value, fallbackUsed) {
 }
 
 export async function getMealRecommendations(userProfile, logs = []) {
-  const apiKey = process.env.GEMINI_API_KEY;
+  let apiKey = process.env.GEMINI_API_KEY;
+  if (apiKey) apiKey = apiKey.replace(/['"]/g, '').trim();
   if (!apiKey) {
     throw new Error('GEMINI_API_KEY is not set in environment variables');
   }
@@ -699,7 +813,8 @@ export async function getMealRecommendations(userProfile, logs = []) {
 }
 
 export async function analyzeFoodText(textQuery) {
-  const apiKey = process.env.GEMINI_API_KEY;
+  let apiKey = process.env.GEMINI_API_KEY;
+  if (apiKey) apiKey = apiKey.replace(/['"]/g, '').trim();
   if (!apiKey) {
     throw new Error('GEMINI_API_KEY is not set in environment variables');
   }

@@ -392,6 +392,7 @@ export default function Scan() {
         console.error("Barcode decoding failed:", err)
         setError(currentCulture === 'fr' ? 'Impossible de lire le code-barres. Essayez de le saisir manuellement.' : 'Could not read a valid barcode from the image. Please try typing it manually.')
         setCapturedImage(null)
+        setBarcodeMode('manual')
       } finally {
         setLocalLoading(false)
       }

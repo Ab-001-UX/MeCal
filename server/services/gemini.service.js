@@ -280,7 +280,7 @@ export async function getDailyMealPlan(profile, lang = 'en') {
       - Daily Water Target: ${waterTargetMl} ml
       - Daily Step Target: ${stepTarget} steps
 
-      Crucially, ensure variety: DO NOT recommend the exact same food items or snacks as yesterday or previous days. The meals and snacks should rotate daily and offer fresh, diverse ideas based on local ingredients.
+      Crucially, ensure variety: DO NOT recommend the exact same food items or snacks as yesterday or previous days. The meals and snacks should rotate daily and offer fresh, diverse ideas based on local ingredients. Also, ensure variety across different users: randomize your selection of traditional recipes and snacks from a wide pool of West African foods (do not always default to the same combinations like Jollof Rice, Ogi/Akara, or Amala/Ewedu for everyone; explore other local delicacies like Ewa Agoyin, Yam Porridge, Plantain Frittata, Bole, Abacha, Masa, Kunun, etc., to keep suggestions unique and dynamic).
       
       Please customize and return appropriate targets for today. They should vary slightly from the baseline to feel organic, realistic, and dynamic (e.g. within +/- 10% of baselines based on their country, tribe, and selected lifestyle).
       

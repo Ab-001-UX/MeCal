@@ -132,10 +132,11 @@ export async function getProfile(req, res) {
 }
 
 export async function logout(req, res) {
+  const isProduction = process.env.NODE_ENV === 'production';
   res.clearCookie('mecal_token', {
     httpOnly: true,
-    sameSite: 'strict',
-    secure: process.env.NODE_ENV === 'production'
+    sameSite: isProduction ? 'none' : 'lax',
+    secure: isProduction
   })
   res.status(200).json({ success: true, message: 'Logged out successfully' })
 }

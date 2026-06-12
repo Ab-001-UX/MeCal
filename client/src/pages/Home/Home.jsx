@@ -1478,8 +1478,8 @@ export default function Home() {
           <div className={styles.emptyStateCard} style={{ padding: '24px', textAlign: 'center', background: 'rgba(255,255,255,0.4)', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.05)', marginTop: '8px' }}>
             <p style={{ margin: '0 0 12px 0', fontSize: '13px', color: 'var(--color-text-secondary)' }}>
               {currentCulture === 'fr'
-                ? "Impossible de charger votre planificateur de repas IA. Vérifiez votre connexion et réessayez."
-                : "Could not load your AI Daily Meal Planner. Please check your network and try again."}
+                ? "Impossible de charger votre emploi du temps repas IA. Vérifiez votre connexion et réessayez."
+                : "Could not load your AI Daily Meal Timetable. Please check your network and try again."}
             </p>
             <button 
               onClick={handleRetryRecommendations} 

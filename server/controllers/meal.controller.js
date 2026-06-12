@@ -4,6 +4,7 @@ import { lookupBarcode } from '../services/openfoodfacts.service.js'
 import { getCachedRecommendations, setCachedRecommendations } from '../services/recommendationCache.js'
 import { profileForAi } from '../utils/userHelpers.js'
 import { getStartOfDay, getEndOfDay } from '../utils/dateHelpers.js'
+import { deleteImage } from '../services/cloudinary.service.js'
 import prisma from '../services/prisma.js'
 
 export async function scanMeal(req, res) {
@@ -35,6 +36,35 @@ export async function getTodayMeals(req, res) {
         }
       }
     })
+
+    // Clean up expired Cloudinary images for this user (background task)
+    const todayStart = getStartOfDay(req, Date.now())
+    const expiredMeals = await prisma.meal.findMany({
+      where: {
+        userId: req.user.id,
+        createdAt: {
+          lt: todayStart
+        },
+        imageUrl: {
+          contains: 'cloudinary'
+        }
+      }
+    })
+
+    if (expiredMeals.length > 0) {
+      (async () => {
+        for (const m of expiredMeals) {
+          if (m.imageUrl) {
+            console.log(`[Cloudinary Cleanup] Deleting expired image for meal ${m.id} (${m.name})`)
+            await deleteImage(m.imageUrl)
+            await prisma.meal.update({
+              where: { id: m.id },
+              data: { imageUrl: null }
+            })
+          }
+        }
+      })().catch(err => console.error('[Cloudinary Cleanup] Background cleanup error:', err))
+    }
     
     res.status(200).json({ success: true, data: meals })
   } catch (error) {
@@ -152,9 +182,9 @@ export async function updateMeal(req, res) {
       return res.status(404).json({ success: false, message: 'Meal not found' })
     }
 
-    const diffMs = Date.now() - new Date(meal.createdAt).getTime()
-    if (diffMs > 10 * 60 * 1000) {
-      return res.status(400).json({ success: false, message: 'Real meals can only be edited within 10 minutes of logging' })
+    const todayStart = getStartOfDay(req, Date.now())
+    if (new Date(meal.createdAt) < todayStart) {
+      return res.status(400).json({ success: false, message: 'Meals from past days cannot be edited' })
     }
 
     const updatedMeal = await prisma.meal.update({
@@ -191,9 +221,9 @@ export async function deleteMeal(req, res) {
       return res.status(404).json({ success: false, message: 'Meal not found' })
     }
 
-    const diffMs = Date.now() - new Date(meal.createdAt).getTime()
-    if (diffMs > 10 * 60 * 1000) {
-      return res.status(400).json({ success: false, message: 'Real meals can only be deleted within 10 minutes of logging' })
+    const todayStart = getStartOfDay(req, Date.now())
+    if (new Date(meal.createdAt) < todayStart) {
+      return res.status(400).json({ success: false, message: 'Meals from past days cannot be deleted' })
     }
 
     await prisma.meal.delete({

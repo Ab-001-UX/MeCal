@@ -1025,10 +1025,8 @@ export default function Home() {
   }
 
   const handleDeleteMeal = async (meal) => {
-    const loggedTime = new Date(meal.createdAt).getTime();
-    const canModify = (Date.now() - loggedTime) <= 10 * 60 * 1000;
-    if (!canModify) {
-      alert(t('mealActionAlert'))
+    if (isPastDay) {
+      alert(currentCulture === 'fr' ? 'Impossible de supprimer les repas des jours passés.' : 'Cannot delete meals from past days.')
       return
     }
 
@@ -1741,10 +1739,8 @@ export default function Home() {
                           className={styles.dropdownItem} 
                           onClick={() => {
                             setActiveMenu(null);
-                            const loggedTime = new Date(meal.createdAt).getTime();
-                            const canModify = (Date.now() - loggedTime) <= 10 * 60 * 1000;
-                            if (!canModify) {
-                              alert(t('mealActionAlert'));
+                            if (isPastDay) {
+                              alert(currentCulture === 'fr' ? 'Impossible de modifier les repas des jours passés.' : 'Cannot modify meals from past days.');
                             } else {
                               setEditingMeal(meal);
                             }

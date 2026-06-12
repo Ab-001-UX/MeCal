@@ -2,7 +2,7 @@ import { Redis } from '@upstash/redis'
 
 const localCache = new Map()
 
-let redis = null
+export let redis = null
 if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
   try {
     redis = new Redis({

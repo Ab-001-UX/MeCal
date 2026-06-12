@@ -93,3 +93,65 @@ export async function uploadImage(base64Image) {
   const result = await response.json()
   return { secure_url: result.secure_url }
 }
+
+export async function deleteImage(imageUrl) {
+  if (!imageUrl || !imageUrl.includes('cloudinary.com')) {
+    return false
+  }
+
+  let cloudName = process.env.CLOUDINARY_CLOUD_NAME
+  let apiKey = process.env.CLOUDINARY_API_KEY
+  let apiSecret = process.env.CLOUDINARY_API_SECRET
+
+  // Fallback to parsing CLOUDINARY_URL if individual variables are not defined
+  if ((!cloudName || !apiKey || !apiSecret) && process.env.CLOUDINARY_URL) {
+    try {
+      const url = process.env.CLOUDINARY_URL
+      const matches = url.match(/^cloudinary:\/\/([^:]+):([^@]+)@(.+)$/)
+      if (matches) {
+        apiKey = matches[1]
+        apiSecret = matches[2]
+        cloudName = matches[3]
+      }
+    } catch (e) {
+      console.error('Failed to parse CLOUDINARY_URL for deletion:', e.message)
+    }
+  }
+
+  if (!cloudName || !apiKey || !apiSecret) {
+    console.warn('Cloudinary credentials missing — skipping image deletion')
+    return false
+  }
+
+  // Extract public ID from the secure url (match after '/image/upload/' up to file extension)
+  const match = imageUrl.match(/\/image\/upload\/(?:v\d+\/)?(.+?)\.[a-z0-9]+$/i)
+  const publicId = match ? match[1] : null
+  if (!publicId) {
+    console.warn('Could not extract public_id from URL:', imageUrl)
+    return false
+  }
+
+  try {
+    const auth = Buffer.from(`${apiKey}:${apiSecret}`).toString('base64')
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloudName}/resources/image/upload?public_ids[]=${encodeURIComponent(publicId)}`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Basic ${auth}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}))
+      console.error('Cloudinary delete failed:', err)
+      return false
+    }
+    const result = await response.json()
+    return result.deleted?.[publicId] === 'deleted' || Object.values(result.deleted || {})[0] === 'deleted'
+  } catch (error) {
+    console.error('Error deleting from Cloudinary:', error.message)
+    return false
+  }
+}

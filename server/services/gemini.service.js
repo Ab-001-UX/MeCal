@@ -9,7 +9,7 @@ async function callGemini(prompt, retries = 2) {
     return await callGroq(prompt);
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
   const payload = { contents: [{ parts: [{ text: prompt }] }] };
 
   let lastError = null;
@@ -269,6 +269,7 @@ export async function getDailyMealPlan(profile, lang = 'en') {
     const waterTargetMl = waterTarget * capacity;
 
     const prompt = `
+      Today's Date: ${new Date().toDateString()}
       Generate a personalized daily nutrition, hydration, and activity blueprint for this user in ${lang === 'fr' ? 'French' : 'English'}.
       Profile: ${JSON.stringify(profile)}
       Allergies to avoid: ${JSON.stringify(profile.allergies || [])}
@@ -279,6 +280,8 @@ export async function getDailyMealPlan(profile, lang = 'en') {
       - Daily Water Target: ${waterTargetMl} ml
       - Daily Step Target: ${stepTarget} steps
 
+      Crucially, ensure variety: DO NOT recommend the exact same food items or snacks as yesterday or previous days. The meals and snacks should rotate daily and offer fresh, diverse ideas based on local ingredients.
+      
       Please customize and return appropriate targets for today. They should vary slightly from the baseline to feel organic, realistic, and dynamic (e.g. within +/- 10% of baselines based on their country, tribe, and selected lifestyle).
       
       Generate:
@@ -427,161 +430,183 @@ export async function getDailyMealPlan(profile, lang = 'en') {
       };
     }
 
+    const rotationIndex = new Date().getDay() % 3;
+
     if (isFrancophone) {
+      const options = [
+        {
+          light: { name: "Bouillie de mil & Beignets", description: "Bouillie de mil traditionnelle légère servie avec de petits beignets chauds.", emoji: "🥣" },
+          medium: { name: "Alloco avec Œuf Bouilli", description: "Bananes douces frites (alloco) accompagnées de deux œufs bouillis pour les protéines.", emoji: "🍌" },
+          heavy: { name: "Riz Gras au Poulet", description: "Riz pilaf parfumé cuit dans une sauce tomate riche avec du poulet grillé et des légumes.", emoji: "🍛" },
+          snacks: [
+            { name: "Banane douce locale", description: "Petite banane mûre locale.", calories: 90, protein: 1, carbs: 22, fat: 0, emoji: "🍌" },
+            { name: "Poignée de Noix de Cajou", description: "Noix de cajou grillées locales.", calories: 160, protein: 5, carbs: 9, fat: 13, emoji: "🥜" },
+            { name: "Salade de fruits frais", description: "Mélange de papaye, mangue et ananas.", calories: 120, protein: 1, carbs: 28, fat: 0, emoji: "🍍" }
+          ]
+        },
+        {
+          light: { name: "Café au Lait & Pain Beurre", description: "Café au lait chaud traditionnel avec du pain frais tartiné de beurre.", emoji: "☕" },
+          medium: { name: "Attiéké avec Poisson Grillé", description: "Semoule de manioc cuite à la vapeur servie avec du poisson grillé et sauce oignon.", emoji: "🐟" },
+          heavy: { name: "Maffé de Bœuf & Riz", description: "Sauce crémeuse à la pâte d'arachide mijotée avec du bœuf et des carottes, servie sur du riz.", emoji: "🍛" },
+          snacks: [
+            { name: "Chips de Banane", description: "Chips croustillantes salées de banane plantain.", calories: 140, protein: 1, carbs: 25, fat: 5, emoji: "🍿" },
+            { name: "Arachides Grillées", description: "Arachides grillées locales.", calories: 150, protein: 6, carbs: 8, fat: 12, emoji: "🥜" },
+            { name: "Morceaux de Mangue", description: "Mangue fraîche coupée en morceaux.", calories: 90, protein: 1, carbs: 23, fat: 0, emoji: "🥭" }
+          ]
+        },
+        {
+          light: { name: "Bouillie de Fonio sucrée", description: "Bouillie crémeuse et légère de fonio sucrée au miel.", emoji: "🥣" },
+          medium: { name: "Plakali avec Sauce Gombo", description: "Pâte de manioc fermentée servie avec une sauce gombo gélatineuse et poisson.", emoji: "🍲" },
+          heavy: { name: "Yassa Poulet & Riz blanc", description: "Poulet mariné au citron et oignons caramélisés, servi avec du riz blanc cuit à la vapeur.", emoji: "🍛" },
+          snacks: [
+            { name: "Noix de coco fraîche", description: "Chair de noix de coco fraîche locale.", calories: 180, protein: 2, carbs: 8, fat: 16, emoji: "🥥" },
+            { name: "Dattes séchées", description: "Dattes séchées naturellement sucrées.", calories: 110, protein: 1, carbs: 28, fat: 0, emoji: "🌴" },
+            { name: "Tranches d'Ananas", description: "Ananas frais sucré.", calories: 80, protein: 1, carbs: 21, fat: 0, emoji: "🍍" }
+          ]
+        }
+      ];
+      const selected = options[rotationIndex];
       fallbackPlan = {
         calorieGoal: calorieTarget,
         waterGoalMl: waterTargetMl,
         stepGoal: stepTarget,
-        light: {
-          name: "Bouillie de mil & Beignets",
-          description: "Bouillie de mil traditionnelle légère servie avec de petits beignets chauds.",
-          calories: Math.round(calorieTarget * 0.22),
-          protein: 8,
-          carbs: 45,
-          fat: 6,
-          emoji: "🥣"
-        },
-        medium: {
-          name: "Alloco avec Œuf Bouilli",
-          description: "Bananes douces frites (alloco) accompagnées de deux œufs bouillis pour les protéines.",
-          calories: Math.round(calorieTarget * 0.35),
-          protein: 14,
-          carbs: 52,
-          fat: 12,
-          emoji: "🍌"
-        },
-        heavy: {
-          name: "Riz Gras au Poulet",
-          description: "Riz pilaf parfumé cuit dans une sauce tomate riche avec du poulet grillé et des légumes.",
-          calories: Math.round(calorieTarget * 0.43),
-          protein: 32,
-          carbs: 75,
-          fat: 18,
-          emoji: "🍛"
-        },
+        light: { ...selected.light, calories: Math.round(calorieTarget * 0.22), protein: 8, carbs: 45, fat: 6 },
+        medium: { ...selected.medium, calories: Math.round(calorieTarget * 0.35), protein: 14, carbs: 52, fat: 12 },
+        heavy: { ...selected.heavy, calories: Math.round(calorieTarget * 0.43), protein: 32, carbs: 75, fat: 18 },
         fruitRecommendation: francoFruit,
-        snacks: [
-          { name: "Banane douce locale", description: "Petite banane mûre locale.", calories: 90, protein: 1, carbs: 22, fat: 0, emoji: "🍌" },
-          { name: "Poignée de Noix de Cajou", description: "Noix de cajou grillées locales.", calories: 160, protein: 5, carbs: 9, fat: 13, emoji: "🥜" },
-          { name: "Salade de fruits frais", description: "Mélange de papaye, mangue et ananas.", calories: 120, protein: 1, carbs: 28, fat: 0, emoji: "🍍" }
-        ]
+        snacks: selected.snacks
       };
     } else if (isYoruba) {
+      const options = [
+        {
+          light: { name: "Ogi (Pap) & Akara", description: "Warm fermented corn pap served with 3 pieces of crispy bean cakes.", emoji: "🥣" },
+          medium: { name: "Amala with Ewedu & Fish", description: "Soft yam flour swallow served with mucilaginous ewedu soup and stewed fish.", emoji: "🍲" },
+          heavy: { name: "Jollof Rice with Grilled Chicken & Dodo", description: "Nigerian smoky Jollof rice served with grilled chicken breast and fried plantain slices.", emoji: "🍛" },
+          snacks: [
+            { name: "Roasted Groundnuts", description: "Handful of dry-roasted local peanuts.", calories: 160, protein: 7, carbs: 6, fat: 14, emoji: "🥜" },
+            { name: "Mosa (Plantain Puffs)", description: "Light fermented sweet plantain puffs.", calories: 150, protein: 2, carbs: 30, fat: 3, emoji: "🍩" },
+            { name: "Garden Egg with Peanut Butter", description: "Crisp local garden egg paired with a spoon of peanut paste.", calories: 120, protein: 4, carbs: 8, fat: 8, emoji: "🍆" }
+          ]
+        },
+        {
+          light: { name: "Boiled Yam with Egg Stew", description: "Boiled white yam slices served with delicious pepper and egg stir-fry.", emoji: "🍠" },
+          medium: { name: "Moi Moi & Custard", description: "Steamed savory bean pudding served with warm creamy custard.", emoji: "🍮" },
+          heavy: { name: "Pounded Yam with Egusi Soup & Beef", description: "Soft pounded yam swallow paired with rich melon seed soup and beef chunks.", emoji: "🍲" },
+          snacks: [
+            { name: "Chin Chin", description: "Crunchy fried dough snack bits.", calories: 150, protein: 3, carbs: 22, fat: 6, emoji: "🍿" },
+            { name: "Roasted Cashew Nuts", description: "Handful of local roasted cashews.", calories: 170, protein: 5, carbs: 9, fat: 13, emoji: "🥜" },
+            { name: "Fruit Salad", description: "Diced local pawpaw, pineapple, and watermelon.", calories: 100, protein: 1, carbs: 24, fat: 0, emoji: "🍉" }
+          ]
+        },
+        {
+          light: { name: "Eko (Agidi) & Akara", description: "Cold corn starch gel served with hot crispy bean cakes.", emoji: "🫔" },
+          medium: { name: "Beans & Fried Plantain (Dodo)", description: "Slow-cooked brown beans seasoned with palm oil, served with fried plantain.", emoji: "🍲" },
+          heavy: { name: "Ofada Rice with Ayamase Sauce & Fish", description: "Unpolished local brown rice topped with spicy green pepper stew, assorted meat, and fish.", emoji: "🍛" },
+          snacks: [
+            { name: "Plantain Chips", description: "Crispy salted unripe plantain chips.", calories: 140, protein: 1, carbs: 26, fat: 4, emoji: "🍿" },
+            { name: "Roasted Plantain (Boli)", description: "Sweet smoky roasted plantain piece.", calories: 180, protein: 2, carbs: 42, fat: 1, emoji: "🍌" },
+            { name: "Fresh Dates", description: "Naturally sweet local dates.", calories: 110, protein: 1, carbs: 28, fat: 0, emoji: "🌴" }
+          ]
+        }
+      ];
+      const selected = options[rotationIndex];
       fallbackPlan = {
         calorieGoal: calorieTarget,
         waterGoalMl: waterTargetMl,
         stepGoal: stepTarget,
-        light: {
-          name: "Ogi (Pap) & Akara",
-          description: "Warm fermented corn pap served with 3 pieces of crispy bean cakes.",
-          calories: Math.round(calorieTarget * 0.22),
-          protein: 12,
-          carbs: 42,
-          fat: 8,
-          emoji: "🥣"
-        },
-        medium: {
-          name: "Amala with Ewedu & Fish",
-          description: "Soft yam flour swallow served with mucilaginous ewedu soup and stewed fish.",
-          calories: Math.round(calorieTarget * 0.35),
-          protein: 26,
-          carbs: 50,
-          fat: 10,
-          emoji: "🍲"
-        },
-        heavy: {
-          name: "Jollof Rice with Grilled Chicken & Dodo",
-          description: "Nigerian smoky Jollof rice served with grilled chicken breast and fried plantain slices.",
-          calories: Math.round(calorieTarget * 0.43),
-          protein: 34,
-          carbs: 70,
-          fat: 16,
-          emoji: "🍛"
-        },
+        light: { ...selected.light, calories: Math.round(calorieTarget * 0.22), protein: 12, carbs: 42, fat: 8 },
+        medium: { ...selected.medium, calories: Math.round(calorieTarget * 0.35), protein: 26, carbs: 50, fat: 10 },
+        heavy: { ...selected.heavy, calories: Math.round(calorieTarget * 0.43), protein: 34, carbs: 70, fat: 16 },
         fruitRecommendation: yorubaFruit,
-        snacks: [
-          { name: "Roasted Groundnuts", description: "Handful of dry-roasted local peanuts.", calories: 160, protein: 7, carbs: 6, fat: 14, emoji: "🥜" },
-          { name: "Mosa (Plantain Puffs)", description: "Light fermented sweet plantain puffs.", calories: 150, protein: 2, carbs: 30, fat: 3, emoji: "🍩" },
-          { name: "Garden Egg with Peanut Butter", description: "Crisp local garden egg paired with a spoon of peanut paste.", calories: 120, protein: 4, carbs: 8, fat: 8, emoji: "🍆" }
-        ]
+        snacks: selected.snacks
       };
     } else if (isIgbo) {
+      const options = [
+        {
+          light: { name: "Okpa (Bambara Nut Pudding)", description: "Traditional steamed bambara nut pudding with a touch of palm oil and fluted pumpkin.", emoji: "🫔" },
+          medium: { name: "Pounded Yam with Oha Soup & Beef", description: "Smooth pounded yam swallow served with fragrant oha leaf soup and cooked beef pieces.", emoji: "🍲" },
+          heavy: { name: "Ukwa (Breadfruit porridge)", description: "Local breadfruit porridge simmered with dry fish, local spices, and fresh pepper.", emoji: "🥣" },
+          snacks: [
+            { name: "Roasted Corn & Ube", description: "Boiled or roasted maize paired with African pear.", calories: 180, protein: 4, carbs: 32, fat: 4, emoji: "🌽" },
+            { name: "Garden Egg", description: "Crisp local white garden eggs.", calories: 35, protein: 1, carbs: 7, fat: 0, emoji: "🍆" },
+            { name: "Cashew Nuts", description: "Roasted crunchy local cashew nuts.", calories: 150, protein: 5, carbs: 9, fat: 12, emoji: "🥜" }
+          ]
+        },
+        {
+          light: { name: "Boiled Yam with Garden Egg Dip", description: "Boiled white yam paired with a savory garden egg and onion sauce.", emoji: "🍠" },
+          medium: { name: "Abacha (African Salad) with Fish", description: "Shredded cassava tossed with palm oil, ugba, garden eggs, and fried fish.", emoji: "🥗" },
+          heavy: { name: "Garri (Eba) with Bitterleaf Soup & Goat Meat", description: "Yellow garri swallow paired with rich bitterleaf soup and tender goat meat.", emoji: "🍲" },
+          snacks: [
+            { name: "Roasted Groundnuts", description: "Handful of roasted peanuts.", calories: 160, protein: 7, carbs: 6, fat: 14, emoji: "🥜" },
+            { name: "Okpa Di Oku (Warm Okpa)", description: "Warm slice of high-protein native bean cake.", calories: 200, protein: 10, carbs: 28, fat: 6, emoji: "🫔" },
+            { name: "Coconut slices", description: "Fresh mature coconut pieces.", calories: 140, protein: 2, carbs: 6, fat: 13, emoji: "🥥" }
+          ]
+        },
+        {
+          light: { name: "Corn Porridge & Akara", description: "Fresh corn meal porridge served with fluffy bean cakes.", emoji: "🥣" },
+          medium: { name: "Ji Mmiri Oku (Yam Pepper Soup)", description: "Spicy, hot yam pepper soup prepared with fresh fish and local herbs.", emoji: "🍲" },
+          heavy: { name: "Pounded Yam with Egusi Soup & Stockfish", description: "Pounded yam served with rich egusi soup cooked with premium stockfish and pumpkin leaves.", emoji: "🍲" },
+          snacks: [
+            { name: "Plantain Chips", description: "Crispy fried plantain strips.", calories: 130, protein: 1, carbs: 24, fat: 4, emoji: "🍿" },
+            { name: "Agidi (Eko) with Stew", description: "Corn starch gel served with a side of rich tomato stew.", calories: 160, protein: 3, carbs: 32, fat: 2, emoji: "🫔" },
+            { name: "Pawpaw slices", description: "Fresh papaya slices.", calories: 80, protein: 1, carbs: 20, fat: 0, emoji: "🥭" }
+          ]
+        }
+      ];
+      const selected = options[rotationIndex];
       fallbackPlan = {
         calorieGoal: calorieTarget,
         waterGoalMl: waterTargetMl,
         stepGoal: stepTarget,
-        light: {
-          name: "Okpa (Bambara Nut Pudding)",
-          description: "Traditional steamed bambara nut pudding with a touch of palm oil and fluted pumpkin.",
-          calories: Math.round(calorieTarget * 0.22),
-          protein: 14,
-          carbs: 38,
-          fat: 10,
-          emoji: "🫔"
-        },
-        medium: {
-          name: "Pounded Yam with Oha Soup & Beef",
-          description: "Smooth pounded yam swallow served with fragrant oha leaf soup and cooked beef pieces.",
-          calories: Math.round(calorieTarget * 0.35),
-          protein: 28,
-          carbs: 55,
-          fat: 12,
-          emoji: "🍲"
-        },
-        heavy: {
-          name: "Ukwa (Breadfruit porridge)",
-          description: "Local breadfruit porridge simmered with dry fish, local spices, and fresh pepper.",
-          calories: Math.round(calorieTarget * 0.43),
-          protein: 24,
-          carbs: 60,
-          fat: 14,
-          emoji: "🥣"
-        },
+        light: { ...selected.light, calories: Math.round(calorieTarget * 0.22), protein: 14, carbs: 38, fat: 10 },
+        medium: { ...selected.medium, calories: Math.round(calorieTarget * 0.35), protein: 28, carbs: 55, fat: 12 },
+        heavy: { ...selected.heavy, calories: Math.round(calorieTarget * 0.43), protein: 24, carbs: 60, fat: 14 },
         fruitRecommendation: igboFruit,
-        snacks: [
-          { name: "Roasted Corn & Ube", description: "Boiled or roasted maize paired with African pear.", calories: 180, protein: 4, carbs: 32, fat: 4, emoji: "🌽" },
-          { name: "Garden Egg", description: "Crisp local white garden eggs.", calories: 35, protein: 1, carbs: 7, fat: 0, emoji: "🍆" },
-          { name: "Cashew Nuts", description: "Roasted crunchy local cashew nuts.", calories: 150, protein: 5, carbs: 9, fat: 12, emoji: "🥜" }
-        ]
+        snacks: selected.snacks
       };
     } else { // Hausa or General Fallback
+      const options = [
+        {
+          light: { name: "Masa with Honey", description: "Fermented rice cakes drizzled with a teaspoon of natural honey.", emoji: "🥞" },
+          medium: { name: "Tuwo Shinkafa with Miyan Taushe & Beef", description: "Soft rice swallow served with rich pumpkin-peanut miyan taushe soup and stewed beef.", emoji: "🍲" },
+          heavy: { name: "White Rice with Stew & Fish", description: "Steamed local white rice topped with rich bell pepper tomato stew and fried fish.", emoji: "🍛" },
+          snacks: [
+            { name: "Kilishi (Beef Jerky)", description: "Thin sun-dried spiced beef strips.", calories: 120, protein: 15, carbs: 4, fat: 5, emoji: "🥩" },
+            { name: "Kunun Aya", description: "Chilled nutritious tiger nut milk drink.", calories: 150, protein: 2, carbs: 28, fat: 4, emoji: "🥛" },
+            { name: "Fresh Dates", description: "Sweet dry dates.", calories: 100, protein: 1, carbs: 25, fat: 0, emoji: "🌴" }
+          ]
+        },
+        {
+          light: { name: "Kunun Gyada & Masa", description: "Nutritious groundnut pap served with fermented rice cakes.", emoji: "🥣" },
+          medium: { name: "Fura da Nono (Millet & Yogurt)", description: "Traditional refreshing millet dough ball mashed into rich local yogurt.", emoji: "🥛" },
+          heavy: { name: "Tuwo Masara with Miyan Kuka & Lamb", description: "Maize meal swallow served with rich dried baobab leaf soup and slow-cooked lamb.", emoji: "🍲" },
+          snacks: [
+            { name: "Dambu Nama", description: "Shredded dried spiced beef floss.", calories: 140, protein: 16, carbs: 2, fat: 8, emoji: "🥩" },
+            { name: "Roasted Groundnuts", description: "Dry-roasted local peanuts.", calories: 160, protein: 7, carbs: 6, fat: 14, emoji: "🥜" },
+            { name: "Tigernuts", description: "Chewy fresh tiger nuts.", calories: 120, protein: 1, carbs: 22, fat: 3, emoji: "🥥" }
+          ]
+        },
+        {
+          light: { name: "Kosai (Hausa Akara) & Kunun Kanwa", description: "Crispy bean cakes paired with millet gruel spiced with ginger.", emoji: "🍘" },
+          medium: { name: "Beans & Sweet Potato Porridge", description: "Savory porridge made from brown beans and sweet potato cubes.", emoji: "🍲" },
+          heavy: { name: "Shinkafa da Miyar Geda (Peanut Soup) & Beef", description: "Fluffy white rice served with a rich, nutty peanut soup and beef.", emoji: "🍛" },
+          snacks: [
+            { name: "Kunun Zaki", description: "Spiced sweet millet beverage.", calories: 130, protein: 2, carbs: 28, fat: 1, emoji: "🥛" },
+            { name: "Gurasa", description: "Traditional local wheat bread, sprinkled with yaji.", calories: 150, protein: 4, carbs: 32, fat: 1, emoji: "🍞" },
+            { name: "Sweet Orange", description: "Fresh local sweet orange.", calories: 70, protein: 1, carbs: 16, fat: 0, emoji: "🍊" }
+          ]
+        }
+      ];
+      const selected = options[rotationIndex];
       fallbackPlan = {
         calorieGoal: calorieTarget,
         waterGoalMl: waterTargetMl,
         stepGoal: stepTarget,
-        light: {
-          name: "Masa with Honey",
-          description: "Fermented rice cakes drizzled with a teaspoon of natural honey.",
-          calories: Math.round(calorieTarget * 0.22),
-          protein: 6,
-          carbs: 45,
-          fat: 4,
-          emoji: "🥞"
-        },
-        medium: {
-          name: "Tuwo Shinkafa with Miyan Taushe & Beef",
-          description: "Soft rice swallow served with rich pumpkin-peanut miyan taushe soup and stewed beef.",
-          calories: Math.round(calorieTarget * 0.35),
-          protein: 28,
-          carbs: 52,
-          fat: 14,
-          emoji: "🍲"
-        },
-        heavy: {
-          name: "White Rice with Stew & Fish",
-          description: "Steamed local white rice topped with rich bell pepper tomato stew and fried fish.",
-          calories: Math.round(calorieTarget * 0.43),
-          protein: 30,
-          carbs: 68,
-          fat: 12,
-          emoji: "🍛"
-        },
+        light: { ...selected.light, calories: Math.round(calorieTarget * 0.22), protein: 6, carbs: 45, fat: 4 },
+        medium: { ...selected.medium, calories: Math.round(calorieTarget * 0.35), protein: 28, carbs: 52, fat: 14 },
+        heavy: { ...selected.heavy, calories: Math.round(calorieTarget * 0.43), protein: 30, carbs: 68, fat: 12 },
         fruitRecommendation: hausaFruit,
-        snacks: [
-          { name: "Kilishi (Beef Jerky)", description: "Thin sun-dried spiced beef strips.", calories: 120, protein: 15, carbs: 4, fat: 5, emoji: "🥩" },
-          { name: "Kunun Aya", description: "Chilled nutritious tiger nut milk drink.", calories: 150, protein: 2, carbs: 28, fat: 4, emoji: "🥛" },
-          { name: "Fresh Dates", description: "Sweet dry dates.", calories: 100, protein: 1, carbs: 25, fat: 0, emoji: "🌴" }
-        ]
+        snacks: selected.snacks
       };
     }
 
@@ -596,7 +621,7 @@ export async function analyzeFoodImage(base64Image) {
     throw new Error('GEMINI_API_KEY is not set in environment variables');
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
   // Extract base64 data (remove header if present)
   const base64Data = base64Image.split(',')[1] || base64Image;
@@ -743,7 +768,7 @@ export async function getMealRecommendations(userProfile, logs = []) {
     throw new Error('GEMINI_API_KEY is not set in environment variables');
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
   const prompt = `
     Generate personalized meal recommendations for a user with the following profile:
@@ -819,7 +844,7 @@ export async function analyzeFoodText(textQuery) {
     throw new Error('GEMINI_API_KEY is not set in environment variables');
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
   const prompt = `
     Analyze this text description of a meal and return a JSON object.

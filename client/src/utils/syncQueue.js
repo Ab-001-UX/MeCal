@@ -1,3 +1,7 @@
+import { logWater } from '../services/water.service.js'
+import { logMeal, logManualMeal } from '../services/meal.service.js'
+import { logActivity, logStepGoalReport } from '../services/activity.service.js'
+
 const DB_NAME = 'mecal-offline'
 const STORE = 'sync_queue'
 const DB_VERSION = 1
@@ -53,23 +57,18 @@ export async function getQueueCount() {
 
 const EXECUTORS = {
   LOG_WATER: async (payload) => {
-    const { logWater } = await import('../services/water.service.js')
     await logWater(payload.amount)
   },
   LOG_MEAL: async (payload) => {
-    const { logMeal } = await import('../services/meal.service.js')
     await logMeal(payload)
   },
   LOG_MANUAL_MEAL: async (payload) => {
-    const { logManualMeal } = await import('../services/meal.service.js')
     await logManualMeal(payload)
   },
   LOG_ACTIVITY: async (payload) => {
-    const { logActivity } = await import('../services/activity.service.js')
     await logActivity(payload)
   },
   STEP_REPORT: async (payload) => {
-    const { logStepGoalReport } = await import('../services/activity.service.js')
     await logStepGoalReport(payload.hit)
   }
 }

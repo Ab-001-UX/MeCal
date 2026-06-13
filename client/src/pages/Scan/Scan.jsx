@@ -5,6 +5,7 @@ import { useUserStore } from '../../store/userStore'
 import styles from './Scan.module.css'
 import axios from 'axios'
 import { useTranslation } from 'react-i18next'
+import { queueOrExecute } from '../../utils/syncQueue.js'
 import { scanBarcode as scanBarcodeApi, getSavedMeals, saveMealToLibrary, removeSavedMeal } from '../../services/meal.service.js'
 import '../../i18n'
 import { useNavigate } from 'react-router-dom'
@@ -433,7 +434,6 @@ export default function Scan() {
 
     if (!navigator.onLine) {
       try {
-        const { queueOrExecute } = await import('../../utils/syncQueue.js')
         await queueOrExecute('LOG_MANUAL_MEAL', payload, () => {
           setToastMessage(currentCulture === 'fr' ? 'Repas enregistré hors ligne (sera synchronisé) 🥗' : 'Meal logged offline (will sync when online) 🥗')
           setShowToast(true)

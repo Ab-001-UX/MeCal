@@ -3147,6 +3147,10 @@
   color: var(--color-text-secondary) !important;
 }
 
+:root[data-theme='dark'] .nibbleModalContent {
+  background: var(--color-bg-soft) !important;
+}
+
 /* Fruit of the Day styles */
 
 

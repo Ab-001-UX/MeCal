@@ -566,7 +566,7 @@
   box-sizing: border-box;
   padding: 10px 12px;
   border: 1px solid #E0E0E0;
-  border-radius: 10px;
+  border-radius: 8px; /* Square/rectangular shape */
   font-size: 14px;
   background: #F9F9F9;
   color: #121212;
@@ -622,7 +622,7 @@
   color: white;
   border: none;
   padding: 12px;
-  border-radius: 12px;
+  border-radius: 8px; /* Square button shape */
   font-weight: var(--font-weight-bold);
   font-size: 15px;
   cursor: pointer;
@@ -1166,11 +1166,14 @@
 .barcodeManualForm {
   background: transparent;
   border: 2px dotted rgba(255, 255, 255, 0.3);
-  border-radius: 24px;
-  padding: 24px 24px;
-  margin-top: 16px;
+  border-radius: 8px; /* Square/rectangular shape */
+  padding: 24px 20px;
+  margin: 16px auto 0 auto;
   display: flex;
   flex-direction: column;
+  width: calc(100% - 32px); /* 16px margins to prevent touching edges */
+  max-width: 350px;
+  box-sizing: border-box;
 }
 
 .barcodeFormHint {

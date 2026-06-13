@@ -1,6 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useOfflineSync } from '../../hooks/useOfflineSync.js'
+import { clearQueue } from '../../utils/syncQueue.js'
 import styles from './SyncStatus.module.css'
 
 export function SyncStatus() {
@@ -17,7 +18,6 @@ export function SyncStatus() {
 
   const handleClear = async (e) => {
     e.stopPropagation()
-    const { clearQueue } = await import('../../utils/syncQueue.js')
     await clearQueue()
     window.location.reload()
   }

@@ -988,49 +988,101 @@ export default function Scan() {
                 </button>
               </div>
             </div>
-            <div className={styles.mealTitleRow}>
-              {isEditingResults ? (
-                <input 
-                  type="text" 
-                  value={editedFoodName} 
-                  onChange={(e) => setEditedFoodName(e.target.value)} 
-                  className={styles.editFoodNameInput} 
-                  placeholder={currentCulture === 'fr' ? "Nom de l'aliment" : "Food Name"}
-                />
-              ) : (
-                <h2>{scanResult?.foodName}</h2>
+            <div className={styles.mealTitleRow} style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '8px', padding: '0 10px' }}>
+              <input 
+                type="text" 
+                value={editedFoodName} 
+                onChange={(e) => {
+                  setEditedFoodName(e.target.value)
+                  if (scanResult) scanResult.foodName = e.target.value
+                }} 
+                className={styles.editFoodNameInput} 
+                style={{ flex: 1, border: 'none', borderBottom: '1px solid #ddd', padding: '6px 0', fontSize: '18px', fontWeight: 'bold', background: 'transparent', outline: 'none' }}
+                placeholder={currentCulture === 'fr' ? "Nom du repas..." : "Name this meal..."}
+              />
+              {editedFoodName && (
+                <button 
+                  onClick={() => {
+                    setEditedFoodName('')
+                    if (scanResult) scanResult.foodName = ''
+                  }} 
+                  style={{ background: 'transparent', border: 'none', padding: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                  title="Clear name"
+                >
+                  <X size={18} color="#999" />
+                </button>
               )}
             </div>
-            {isEditingResults ? (
-              <p className={styles.foodDescriptionEditing}>{i18n[currentCulture].editInstruction}</p>
-            ) : (
-              <>
-                <p className={styles.foodDescription}>{scanResult?.description}</p>
-                {scanResult?.confidence && (
-                  <p className={styles.confidenceBadge}>
-                    {t('scanConfidence', { level: scanResult.confidence })}
-                  </p>
-                )}
-              </>
+            <p className={styles.foodDescription} style={{ padding: '0 10px', margin: '4px 0' }}>{scanResult?.description}</p>
+            {scanResult?.confidence && (
+              <p className={styles.confidenceBadge} style={{ alignSelf: 'flex-start', margin: '4px 10px' }}>
+                {t('scanConfidence', { level: scanResult.confidence })}
+              </p>
             )}
           </div>
 
-          <div className={styles.resultTypeGroup} style={{ padding: '0 20px', marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {/* Full Course Meal vs Snack Selector */}
+          <div className={styles.courseTypeGroup} style={{ padding: '0 20px', marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <label style={{ fontSize: '12.5px', fontWeight: '600', color: 'var(--color-text-secondary)', alignSelf: 'flex-start' }}>
-              {currentCulture === 'fr' ? 'Type de repas / moment :' : 'Meal Slot / Period:'}
+              {currentCulture === 'fr' ? 'S\'agit-il d\'un repas complet ou d\'un en-cas ?' : 'Is this a full course meal or a snack?'}
             </label>
-            <select
-              value={resultMealType}
-              onChange={(e) => setResultMealType(e.target.value)}
-              className={styles.formSelect}
-              style={{ width: '100%', padding: '10px 14px', fontSize: '14px' }}
-            >
-              <option value="breakfast">{currentCulture === 'fr' ? '🍳 Petit-déjeuner' : '🍳 Breakfast'}</option>
-              <option value="lunch">{currentCulture === 'fr' ? '🍛 Déjeuner' : '🍛 Lunch'}</option>
-              <option value="dinner">{currentCulture === 'fr' ? '🍲 Dîner' : '🍲 Dinner'}</option>
-              <option value="snack">{currentCulture === 'fr' ? '🍎 Collation / Snack' : '🍎 Snack'}</option>
-            </select>
+            <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
+              <button
+                type="button"
+                style={{
+                  flex: 1,
+                  padding: '10px',
+                  borderRadius: '8px',
+                  border: '1.5px solid',
+                  borderColor: resultMealType !== 'snack' ? 'var(--color-primary)' : '#ddd',
+                  background: resultMealType !== 'snack' ? 'rgba(224, 86, 253, 0.05)' : 'white',
+                  color: resultMealType !== 'snack' ? 'var(--color-primary)' : '#555',
+                  fontWeight: 'bold',
+                  fontSize: '13px',
+                  cursor: 'pointer'
+                }}
+                onClick={() => setResultMealType('lunch')}
+              >
+                🍽️ {currentCulture === 'fr' ? 'Repas Complet' : 'Full Course'}
+              </button>
+              <button
+                type="button"
+                style={{
+                  flex: 1,
+                  padding: '10px',
+                  borderRadius: '8px',
+                  border: '1.5px solid',
+                  borderColor: resultMealType === 'snack' ? 'var(--color-primary)' : '#ddd',
+                  background: resultMealType === 'snack' ? 'rgba(224, 86, 253, 0.05)' : 'white',
+                  color: resultMealType === 'snack' ? 'var(--color-primary)' : '#555',
+                  fontWeight: 'bold',
+                  fontSize: '13px',
+                  cursor: 'pointer'
+                }}
+                onClick={() => setResultMealType('snack')}
+              >
+                🍎 {currentCulture === 'fr' ? 'En-cas / Snack' : 'Snack'}
+              </button>
+            </div>
           </div>
+
+          {resultMealType !== 'snack' && (
+            <div className={styles.resultTypeGroup} style={{ padding: '0 20px', marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--color-text-secondary)', alignSelf: 'flex-start' }}>
+                {currentCulture === 'fr' ? 'Moment du repas :' : 'Which meal slot?'}
+              </label>
+              <select
+                value={resultMealType}
+                onChange={(e) => setResultMealType(e.target.value)}
+                className={styles.formSelect}
+                style={{ width: '100%', padding: '10px 14px', fontSize: '14px' }}
+              >
+                <option value="breakfast">{currentCulture === 'fr' ? '🍳 Petit-déjeuner' : '🍳 Breakfast'}</option>
+                <option value="lunch">{currentCulture === 'fr' ? '🍛 Déjeuner' : '🍛 Lunch'}</option>
+                <option value="dinner">{currentCulture === 'fr' ? '🍲 Dîner' : '🍲 Dinner'}</option>
+              </select>
+            </div>
+          )}
 
           {showToast && (
             <div className={styles.toast}>

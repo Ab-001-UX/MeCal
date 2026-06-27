@@ -29,7 +29,7 @@ export async function executeMealPipeline({ image, userId, type }) {
       protein: parseFloat(analysis.macros.protein),
       carbs: parseFloat(analysis.macros.carbs),
       fat: parseFloat(analysis.macros.fat),
-      imageUrl: uploadResult.secure_url,
+      imageUrl: null, // Scanned images are processed by AI but not saved to the DB
       type: type || null,
       userId: userId
     }

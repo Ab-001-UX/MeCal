@@ -325,7 +325,11 @@ export async function scanBarcode(req, res) {
     })
   } catch (error) {
     console.error('Barcode scan error:', error)
-    res.status(400).json({ success: false, message: error.message || 'Barcode lookup failed' })
+    let message = error.message || 'Barcode lookup failed'
+    if (message.includes('not found') || message.includes('failed') || message.includes('Open Food Facts')) {
+      message = 'Product not found. Local West African snacks are often missing from global barcode databases. Please snap a photo of the product package or item to log it with AI instead!'
+    }
+    res.status(400).json({ success: false, message })
   }
 }
 

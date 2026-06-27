@@ -57,7 +57,7 @@ async function callGemini(prompt, retries = 2) {
     return await callGroq(prompt);
   } catch (groqError) {
     console.error('[AI] Groq fallback also failed:', groqError.message);
-    throw lastError;
+    throw new Error(`AI services failed: Gemini error (${lastError?.message || lastError}) | Groq error (${groqError.message})`);
   }
 }
 
@@ -131,7 +131,30 @@ async function callGroqVision(prompt, base64Data) {
 }
 
 function parseJsonFromText(text) {
-  const jsonStr = text.replace(/```json|```/g, '').trim();
+  if (!text) throw new Error('Empty text content');
+  
+  // Find first occurrence of { or [
+  const firstBrace = text.indexOf('{');
+  const firstBracket = text.indexOf('[');
+  
+  let startIdx = -1;
+  let endIdx = -1;
+  
+  if (firstBrace !== -1 && (firstBracket === -1 || firstBrace < firstBracket)) {
+    startIdx = firstBrace;
+    endIdx = text.lastIndexOf('}');
+  } else if (firstBracket !== -1) {
+    startIdx = firstBracket;
+    endIdx = text.lastIndexOf(']');
+  }
+  
+  if (startIdx === -1 || endIdx === -1 || endIdx < startIdx) {
+    // Try standard fallback cleanup
+    const clean = text.replace(/```json|```/g, '').trim();
+    return JSON.parse(clean);
+  }
+  
+  const jsonStr = text.slice(startIdx, endIdx + 1);
   return JSON.parse(jsonStr);
 }
 
@@ -676,8 +699,7 @@ export async function analyzeFoodImage(base64Image) {
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!text) throw new Error('Empty Gemini response');
     
-    const jsonStr = text.replace(/```json|```/g, '').trim();
-    const result = JSON.parse(jsonStr);
+    const result = parseJsonFromText(text);
     
     const validation = validateNutritionData(result);
     
@@ -817,8 +839,7 @@ export async function getMealRecommendations(userProfile, logs = []) {
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
     
     // Parse the JSON from the response
-    const jsonStr = text.replace(/```json|```/g, '').trim();
-    return JSON.parse(jsonStr);
+    return parseJsonFromText(text);
   } catch (error) {
     console.error('Gemini Service Error:', error);
     // Fallback to hardcoded values if AI fails
@@ -896,8 +917,7 @@ export async function analyzeFoodText(textQuery) {
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
     
     // Parse the JSON from the response
-    const jsonStr = text.replace(/```json|```/g, '').trim();
-    const result = JSON.parse(jsonStr);
+    const result = parseJsonFromText(text);
     
     // Validate data
     const validation = validateNutritionData(result);

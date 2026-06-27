@@ -157,6 +157,33 @@ const DAILY_THEMES = [
   'Seasonal and local eating in West Africa — why fresh and unprocessed always wins',
 ]
 
+function parseJsonFromText(text) {
+  if (!text) throw new Error('Empty text content');
+  
+  // Find first occurrence of { or [
+  const firstBrace = text.indexOf('{');
+  const firstBracket = text.indexOf('[');
+  
+  let startIdx = -1;
+  let endIdx = -1;
+  
+  if (firstBrace !== -1 && (firstBracket === -1 || firstBrace < firstBracket)) {
+    startIdx = firstBrace;
+    endIdx = text.lastIndexOf('}');
+  } else if (firstBracket !== -1) {
+    startIdx = firstBracket;
+    endIdx = text.lastIndexOf(']');
+  }
+  
+  if (startIdx === -1 || endIdx === -1 || endIdx < startIdx) {
+    const clean = text.replace(/```json|```/g, '').trim();
+    return JSON.parse(clean);
+  }
+  
+  const jsonStr = text.slice(startIdx, endIdx + 1);
+  return JSON.parse(jsonStr);
+}
+
 // ── Groq generation ───────────────────────────────────────────────────────────
 async function generateWithGroq() {
   // Deterministic theme per calendar date — same theme all day, new theme tomorrow
@@ -219,9 +246,7 @@ Respond with ONLY the raw JSON array. No markdown, no code blocks, no explanatio
 
   if (!raw) throw new Error('Groq returned empty response')
 
-  // Strip any accidental markdown code fences
-  const cleaned = raw.replace(/^```json?\s*/i, '').replace(/```\s*$/i, '').trim()
-  const tips    = JSON.parse(cleaned)
+  const tips = parseJsonFromText(raw)
 
   if (!Array.isArray(tips) || tips.length === 0) {
     throw new Error('Groq response was not a valid array')

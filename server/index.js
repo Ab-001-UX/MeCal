@@ -11,6 +11,9 @@ import imageRoutes from './routes/image.routes.js'
 import wellnessRoutes from './routes/wellness.routes.js'
 import prisma from './services/prisma.js'
 import * as Sentry from '@sentry/node'
+import { getDailyMealPlan } from './services/gemini.service.js'
+import fs from 'fs'
+import path from 'path'
 
 dotenv.config({ override: true })
 
@@ -49,8 +52,49 @@ async function enableRLSOnStartup() {
         console.error(`Failed to create index "${idx.name}":`, err.message)
       })
     }
+
+    // Ensure "type" column exists on public."Meal" table dynamically to fix schema drift
+    await prisma.$executeRawUnsafe(`
+      ALTER TABLE public."Meal" ADD COLUMN IF NOT EXISTS "type" text;
+    `).then(() => {
+      console.log('Ensured column "type" exists on Meal table.')
+    }).catch(err => {
+      console.error('Failed to add "type" column to Meal table:', err.message)
+    })
     
     console.log('Row Level Security and covering indexes verified for all tables.')
+
+    // Temporary startup verification test
+    const testProfile = {
+      name: 'Monsurat',
+      age: 26,
+      height: 165,
+      weight: 78,
+      targetWeight: 65,
+      unitPreference: 'kg',
+      gender: 'Female',
+      goal: 'lose',
+      targetDuration: '3 months',
+      country: 'Nigeria',
+      tribe: 'Yoruba',
+      lifestyleType: 'student',
+      budgetPreference: 'moderate',
+      activityLevel: 'moderate',
+      calorieGoal: 1500,
+      waterGoal: 5,
+      stepGoal: 8500
+    }
+    console.log('[Startup Test] Running getDailyMealPlan API test...')
+    getDailyMealPlan(testProfile, 'en')
+      .then(res => {
+        console.log('[Startup Test] getDailyMealPlan Success. Source:', res.source)
+        fs.writeFileSync(path.join(process.cwd(), 'startup_meal_plan_test.json'), JSON.stringify(res, null, 2))
+      })
+      .catch(err => {
+        console.error('[Startup Test] getDailyMealPlan Failed:', err.message)
+        fs.writeFileSync(path.join(process.cwd(), 'startup_meal_plan_test.json'), JSON.stringify({ error: err.message, stack: err.stack }, null, 2))
+      })
+
   } catch (error) {
     console.error('Failed to configure database on startup:', error.message)
   } finally {

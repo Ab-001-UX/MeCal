@@ -1654,68 +1654,41 @@ export default function Home() {
             </div>
           ) : (
             displayMeals.map(meal => (
-              <div key={meal.id} className={styles.loggedMealCard}>
-                <div className={styles.loggedMealImageWrapper}>
-                  <MealImage
-                    mealName={meal.name}
-                    imageUrl={meal.imageUrl || meal.image}
-                    className={styles.loggedMealImage}
-                    lang={currentCulture}
-                  />
-                  
-                  {/* Intensity Badge */}
-                  <div 
-                    className={`${styles.intensityBadge} ${styles[`intensityBadge_${meal.intensity || 'low'}`]}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setActiveTooltip(meal.id);
-                      setTimeout(() => setActiveTooltip(null), 10000);
-                    }}
-                  >
-                    {meal.intensity === 'high' ? <Zap size={10} color="white" /> : meal.intensity === 'medium' ? <ThumbsUp size={10} color="white" /> : <Leaf size={10} color="white" />}
+              <div key={meal.id} className={styles.loggedMealCard} style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '16px 20px', borderRadius: '12px', background: 'var(--color-bg-soft)', border: '1px solid var(--color-border)', position: 'relative' }}>
+                <div className={styles.loggedMealHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                  <div className={styles.timeAndType} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span className={styles.mealTime} style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>{meal.time || '12:00 PM'}</span>
+                    {meal.type && (
+                      <span className={styles[`dot_${meal.type.toLowerCase()}`]} style={{ width: '8px', height: '8px', borderRadius: '50%', display: 'inline-block' }} />
+                    )}
+                    <span className={styles.mealType} style={{ textTransform: 'uppercase', fontWeight: 'bold', fontSize: '11px', color: 'var(--color-primary)' }}>
+                      {meal.type ? (currentCulture === 'fr' ? (meal.type === 'breakfast' ? 'petit-déjeuner' : meal.type === 'lunch' ? 'déjeuner' : meal.type === 'dinner' ? 'dîner' : 'en-cas') : meal.type) : t('meal')}
+                    </span>
                   </div>
-
-                  {/* Tooltip */}
-                  {activeTooltip === meal.id && (
-                    <div className={styles.explanationTooltip}>
-                      {meal.intensity === 'high'
-                        ? (currentCulture === 'fr' ? 'Repas riche en calories' : 'High calorie meal')
-                        : meal.intensity === 'medium'
-                          ? (currentCulture === 'fr' ? 'Repas modéré en calories' : 'Medium calorie meal')
-                          : (currentCulture === 'fr' ? 'Repas léger en calories' : 'Low calorie meal')}
-                    </div>
-                  )}
                 </div>
-                <div className={styles.loggedMealContent}>
-                  <div className={styles.loggedMealHeader}>
-                    <div className={styles.timeAndType} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span className={styles.mealTime}>{meal.time || '12:00 PM'}</span>
-                      {meal.type && (
-                        <span className={styles[`dot_${meal.type.toLowerCase()}`]} style={{ width: '8px', height: '8px', borderRadius: '50%', display: 'inline-block' }} />
-                      )}
-                      <span className={styles.mealType} style={{ textTransform: 'capitalize' }}>
-                        {meal.type ? (currentCulture === 'fr' ? (meal.type === 'breakfast' ? 'petit-déjeuner' : meal.type === 'lunch' ? 'déjeuner' : meal.type === 'dinner' ? 'dîner' : 'collation') : meal.type) : t('meal')}
-                      </span>
-                    </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 'bold', color: 'var(--color-text-primary)' }}>
+                    {meal.name}
+                  </h4>
+                </div>
+
+                <div className={styles.mealItemMacros} style={{ display: 'flex', gap: '12px', marginTop: '4px' }}>
+                  <div className={styles.macroItem} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--color-text-secondary)' }}>
+                    <Flame size={12} color="#FF4500" />
+                    <span>{meal.calories} kcal</span>
                   </div>
-                  <h4>{meal.name}</h4>
-                  <div className={styles.mealItemMacros}>
-                    <div className={styles.macroItem}>
-                      <Flame size={12} color="#FF4500" />
-                      <span>{meal.calories} kcal</span>
-                    </div>
-                    <div className={styles.macroItem}>
-                      <Dumbbell size={12} color="#FFD600" />
-                      <span>{meal.protein || 0}g</span>
-                    </div>
-                    <div className={styles.macroItem}>
-                      <Wheat size={12} color="#4A148C" />
-                      <span>{meal.carbs || 0}g</span>
-                    </div>
-                    <div className={styles.macroItem}>
-                      <Droplet size={12} color="#AEEA00" />
-                      <span>{meal.fat || 0}g</span>
-                    </div>
+                  <div className={styles.macroItem} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--color-text-secondary)' }}>
+                    <Dumbbell size={12} color="#FFD600" />
+                    <span>{meal.protein || 0}g</span>
+                  </div>
+                  <div className={styles.macroItem} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--color-text-secondary)' }}>
+                    <Wheat size={12} color="#4A148C" />
+                    <span>{meal.carbs || 0}g</span>
+                  </div>
+                  <div className={styles.macroItem} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--color-text-secondary)' }}>
+                    <Droplet size={12} color="#AEEA00" />
+                    <span>{meal.fat || 0}g</span>
                   </div>
                 </div>
                 

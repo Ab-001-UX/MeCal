@@ -97,8 +97,6 @@ async function enableRLSOnStartup() {
 
   } catch (error) {
     console.error('Failed to configure database on startup:', error.message)
-  } finally {
-    await prisma.$disconnect()
   }
 }
 

@@ -5,6 +5,7 @@ import { getCachedRecommendations, setCachedRecommendations } from '../services/
 import { profileForAi } from '../utils/userHelpers.js'
 import { getStartOfDay, getEndOfDay } from '../utils/dateHelpers.js'
 import { deleteImage } from '../services/cloudinary.service.js'
+import { fetchFoodImageUrl } from '../services/foodImage.service.js'
 import prisma from '../services/prisma.js'
 
 export async function scanMeal(req, res) {
@@ -88,7 +89,8 @@ export async function logManualMeal(req, res) {
       protein,
       carbs,
       fat,
-      type
+      type,
+      imageUrl
     } = req.body
     
     if (!foodName) {
@@ -100,6 +102,7 @@ export async function logManualMeal(req, res) {
     
     if (calories !== undefined && protein !== undefined && carbs !== undefined && fat !== undefined) {
       // Direct logging with pre-calculated suggested macros
+      const mealImage = imageUrl || await fetchFoodImageUrl(foodName)
       savedMeal = await prisma.meal.create({
         data: {
           name: foodName,
@@ -107,7 +110,7 @@ export async function logManualMeal(req, res) {
           protein: parseFloat(protein),
           carbs: parseFloat(carbs),
           fat: parseFloat(fat),
-          imageUrl: "https://via.placeholder.com/400x300.png?text=Suggested+Meal",
+          imageUrl: mealImage,
           type: type || null,
           userId: req.user.id
         }
@@ -139,6 +142,7 @@ export async function logManualMeal(req, res) {
       
       const analysis = await analyzeFoodText(textQuery)
       fallbackUsed = analysis.fallbackUsed
+      const mealImage = imageUrl || await fetchFoodImageUrl(analysis.foodName || foodName)
       
       // Save to database
       savedMeal = await prisma.meal.create({
@@ -148,7 +152,7 @@ export async function logManualMeal(req, res) {
           protein: parseFloat(analysis.macros.protein),
           carbs: parseFloat(analysis.macros.carbs),
           fat: parseFloat(analysis.macros.fat),
-          imageUrl: "https://via.placeholder.com/400x300.png?text=Manual+Entry",
+          imageUrl: mealImage,
           type: type || null,
           userId: req.user.id
         }
@@ -244,6 +248,7 @@ export async function logMeal(req, res) {
       return res.status(400).json({ success: false, message: 'Food name is required' })
     }
 
+    const mealImage = imageUrl || await fetchFoodImageUrl(foodName)
     const savedMeal = await prisma.meal.create({
       data: {
         name: foodName,
@@ -251,7 +256,7 @@ export async function logMeal(req, res) {
         protein: parseFloat(protein) || 0,
         carbs: parseFloat(carbs) || 0,
         fat: parseFloat(fat) || 0,
-        imageUrl: imageUrl || null,
+        imageUrl: mealImage,
         type: type || null,
         userId: req.user.id
       }

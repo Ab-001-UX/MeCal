@@ -28,7 +28,10 @@
 
 .topBarTitle {
   font-weight: var(--font-weight-bold);
-  font-size: 16px;
+  font-size: 22px;
+  text-align: center;
+  flex: 1;
+  letter-spacing: 0.01em;
 }
 
 .backBtn {

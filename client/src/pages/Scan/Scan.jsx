@@ -8,7 +8,7 @@ import { queueOrExecute } from '../../utils/syncQueue.js'
 import { getSavedMeals, saveMealToLibrary, removeSavedMeal } from '../../services/meal.service.js'
 import '../../i18n'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Minus, Heart, X, BookOpen, Utensils } from 'lucide-react'
+import { Plus, Minus, Heart, X, BookOpen, Utensils, ArrowLeft } from 'lucide-react'
 
 const i18n = {
   en: {
@@ -434,11 +434,11 @@ export default function Scan() {
     <div className={styles.container}>
       {/* Top Header */}
       <div className={styles.topBar}>
-        <button className={styles.backBtn} onClick={() => navigate(-1)}>
-          <X size={24} color="white" />
+        <button className={styles.backBtn} onClick={() => navigate(-1)} aria-label="Go back">
+          <ArrowLeft size={24} color="white" />
         </button>
         <span className={styles.topBarTitle}>
-          {showResults ? i18n[currentCulture].nutrition : (currentCulture === 'fr' ? 'Enregistrer un Repas' : 'Log Meal')}
+          {showResults ? i18n[currentCulture].nutrition : (currentCulture === 'fr' ? 'Enregistrer un Repas' : 'Log Your Meal')}
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           {showResults ? (

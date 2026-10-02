@@ -574,8 +574,7 @@ export default function Profile() {
           background: isPlanCompleted ? 'linear-gradient(135deg, rgba(234, 179, 8, 0.12), rgba(34, 197, 94, 0.12))' : 'var(--color-bg-base)', 
           border: isPlanCompleted ? '1.5px solid rgba(234, 179, 8, 0.45)' : '1px solid var(--color-border)', 
           borderRadius: '16px', 
-          padding: '16px',
-          boxShadow: isPlanCompleted ? '0 4px 16px rgba(234, 179, 8, 0.15)' : 'none'
+          padding: '16px'
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -611,8 +610,7 @@ export default function Profile() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '8px',
-            boxShadow: '0 4px 12px rgba(46, 125, 50, 0.2)'
+            gap: '8px'
           }}
         >
           <span>🚀</span>
@@ -690,28 +688,6 @@ export default function Profile() {
       </div>
 
       <div className={styles.actions}>
-        <button 
-          type="button" 
-          onClick={() => setShowNewPlanWizard(true)}
-          style={{
-            width: '100%',
-            padding: '13px',
-            borderRadius: '12px',
-            border: '1.5px solid var(--color-primary)',
-            background: 'var(--color-primary-soft, rgba(46, 125, 50, 0.1))',
-            color: 'var(--color-primary)',
-            fontWeight: '700',
-            fontSize: '14.5px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px'
-          }}
-        >
-          <span>🚀</span>
-          <span>{currentCulture === 'fr' ? 'Changer d’objectif / Nouveau plan' : 'Change Goal / Start New Plan'}</span>
-        </button>
         <button type="button" className={styles.buttonPrimary} onClick={openEdit}>{currentCulture === 'fr' ? 'Modifier le profil' : 'Edit Profile'}</button>
         <button type="button" className={styles.buttonDanger} onClick={handleLogout}>{currentCulture === 'fr' ? 'Se déconnecter' : 'Log Out'}</button>
       </div>

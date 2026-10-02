@@ -26,7 +26,7 @@
   "mealPlan": "Meal plan for the day",
   "dailySteps": "Movement & Steps Tracker",
   "whatIAteToday": "Food Journal & Logged Meals",
-  "noMealsLogged": "No meals logged today. Use the Camera tab to add some!",
+  "noMealsLogged": "No meals logged today. Use the Log Meal tab to add your first meal!",
   "completedTarget": "Completed {{percent}}% of today's target",
   "calorieGoalMessage": "Your goal is <strong>{{goal}} kcal</strong> today — you've got this! 💪",
   "milestonesSub": "Complete daily healthy activities to unlock your milestone badges! 🔓",
@@ -38,7 +38,7 @@
   "danceRhythmTooltip": "Log 15+ minutes of Afrobeats Dance to unlock",
   "mindfulScannerTitle": "Mindful Logger",
   "mindfulScannerCompleted": "Completed! Logged first meal of the day",
-  "mindfulScannerTooltip": "Log any meal using Gemini Camera to unlock",
+  "mindfulScannerTooltip": "Log any meal to unlock",
   "caloriePerfectTitle": "Calorie Perfect",
   "caloriePerfectCompleted": "Completed! Stayed within your {{goal}} kcal limit",
   "caloriePerfectTooltip": "Log food within your {{goal}} kcal goal to unlock",
@@ -64,13 +64,13 @@
   "scanConfidence": "Confidence: {{level}}",
   "kcalBurned": "{{calories}} kcal burned",
   "noMealsLoggedTitle": "No Meals Logged Today",
-  "noMealsLoggedText": "Meals you log today will show up here. Snap a photo with the Camera tab or add one manually to get started!",
-  "scanWithCamera": "Log with Photo",
+  "noMealsLoggedText": "Meals you log today will show up here. Enter your meal manually to calculate calories and update your journal!",
+  "scanWithCamera": "Log Meal",
   "meal": "Meal",
   "edit": "Edit",
   "delete": "Delete",
   "mealActionAlert": "Real meals can only be edited or deleted within 10 minutes of logging to maintain tracking integrity.",
-  "scanFood": "Photo Log",
+  "scanFood": "Log Meal",
   "aiCompanionTitle": "MeCal AI Companion",
   "aiScoreText": "Score: {{score}}% • {{message}}",
   "scoreMsgFresh": "A fresh start tomorrow 💫",
@@ -195,14 +195,13 @@
   },
   "nav": {
     "home": "Home",
-    "scan": "Camera",
+    "scan": "Log Meal",
+    "logMeal": "Log Meal",
     "history": "History",
     "profile": "Profile"
   },
   "scan": {
-    "barcodePlaceholder": "Enter barcode number",
-    "barcodeLookup": "Look up product",
-    "barcodeHint": "Find the barcode on packaged food and enter the numbers.",
-    "barcodeNotFound": "Product not found. Try manual entry."
+    "manual": "Manual Log",
+    "library": "Saved Foods"
   }
 }

@@ -32,6 +32,7 @@ export default function Timetable() {
   const [showToast, setShowToast] = useState(false)
   const [toastMessage, setToastMessage] = useState('')
   const [isPlanLoading, setIsPlanLoading] = useState(!isPlanLoaded)
+  const [activeFilter, setActiveFilter] = useState('all')
 
   const aiPlan = React.useMemo(() => {
     if (!aiMealPlan) return null
@@ -47,15 +48,15 @@ export default function Timetable() {
     if (isGainGoal && snacks[0]) {
       formattedPlan.push({ ...snacks[0], slotType: 'snack', slotLabel: slotLabels.snackMorning, time: '11:00 AM' })
     }
-    formattedPlan.push({ ...aiMealPlan.heavy, slotType: 'lunch', slotLabel: slotLabels.lunch, time: '13:30' })
+    formattedPlan.push({ ...aiMealPlan.heavy, slotType: 'lunch', slotLabel: slotLabels.lunch, time: '1:30 PM' })
     if (isGainGoal && snacks[1]) {
-      formattedPlan.push({ ...snacks[1], slotType: 'snack', slotLabel: slotLabels.snackAfternoon, time: '16:30' })
+      formattedPlan.push({ ...snacks[1], slotType: 'snack', slotLabel: slotLabels.snackAfternoon, time: '4:30 PM' })
     } else if (snacks[0]) {
-      formattedPlan.push({ ...snacks[0], slotType: 'snack', slotLabel: slotLabels.snackAfternoon, time: '16:30' })
+      formattedPlan.push({ ...snacks[0], slotType: 'snack', slotLabel: slotLabels.snackAfternoon, time: '4:30 PM' })
     }
-    formattedPlan.push({ ...aiMealPlan.medium, slotType: 'dinner', slotLabel: slotLabels.dinner, time: '19:30' })
+    formattedPlan.push({ ...aiMealPlan.medium, slotType: 'dinner', slotLabel: slotLabels.dinner, time: '7:30 PM' })
     if (isGainGoal && snacks[2]) {
-      formattedPlan.push({ ...snacks[2], slotType: 'snack', slotLabel: slotLabels.snackEvening, time: '22:00' })
+      formattedPlan.push({ ...snacks[2], slotType: 'snack', slotLabel: slotLabels.snackEvening, time: '10:00 PM' })
     }
     
     return {
@@ -66,7 +67,7 @@ export default function Timetable() {
       totalFat: formattedPlan.reduce((s, m) => s + (m.fat || 0), 0),
       budgetTier: displayUser?.budgetPreference || 'moderate'
     }
-  }, [aiMealPlan, displayUser?.budgetPreference, displayUser?.goal])
+  }, [aiMealPlan, displayUser?.budgetPreference, displayUser?.goal, currentCulture])
 
   useEffect(() => {
     const todayStr = new Date().toDateString()
@@ -92,8 +93,8 @@ export default function Timetable() {
 
   const fetchAiPlan = async () => {
     try {
-      const currentCulture = language === 'fr' ? 'fr' : 'en'
-      const response = await axios.get(`/api/meal/recommendations?lang=${currentCulture}`, { withCredentials: true })
+      const culture = language === 'fr' ? 'fr' : 'en'
+      const response = await axios.get(`/api/meal/recommendations?lang=${culture}`, { withCredentials: true })
       if (response.data.success && response.data.data) {
         setAiMealPlan(response.data.data)
         setLastFetchedDate(new Date().toDateString())
@@ -137,6 +138,21 @@ export default function Timetable() {
 
   const goals = getDynamicCalorieAndMacroGoals(displayUser)
 
+  const filterTabs = [
+    { id: 'all', label: currentCulture === 'fr' ? 'Tous les repas' : 'All Meals' },
+    { id: 'breakfast', label: currentCulture === 'fr' ? 'Petit-déjeuner' : 'Breakfast' },
+    { id: 'lunch', label: currentCulture === 'fr' ? 'Déjeuner' : 'Lunch' },
+    { id: 'dinner', label: currentCulture === 'fr' ? 'Dîner' : 'Dinner' },
+    { id: 'snack', label: currentCulture === 'fr' ? 'Collations' : 'Snacks' },
+  ]
+
+  const filteredPlan = React.useMemo(() => {
+    if (!aiPlan?.plan) return []
+    if (activeFilter === 'all') return aiPlan.plan
+    if (activeFilter === 'snack') return aiPlan.plan.filter(m => m.slotType === 'snack')
+    return aiPlan.plan.filter(m => m.slotType === activeFilter)
+  }, [aiPlan, activeFilter])
+
   if (isPlanLoading || !aiPlan) {
     return <TimetableSkeleton />
   }
@@ -153,89 +169,124 @@ export default function Timetable() {
         </div>
       )}
 
-      {/* Sleek Header */}
-      <div className={styles.header}>
-        <button className={styles.backBtn} onClick={() => navigate('/home')}>
-          <ChevronLeft size={20} />
-        </button>
-        <div className={styles.headerInfo}>
-          <h2 className={styles.title}>{t('suggestedFoodTimetable')}</h2>
-          <p className={styles.subtitle}>
-            {t('suggestedFoodTimetableSub')}
-          </p>
+      {/* Fixed Non-Scrollable Top Controls Header */}
+      <div className={styles.fixedHeader}>
+        {/* Sleek Header Bar */}
+        <div className={styles.header}>
+          <button className={styles.backBtn} onClick={() => navigate('/home')}>
+            <ChevronLeft size={20} />
+          </button>
+          <div className={styles.headerInfo}>
+            <h2 className={styles.title}>{t('suggestedFoodTimetable')}</h2>
+            <p className={styles.subtitle}>
+              {t('suggestedFoodTimetableSub')}
+            </p>
+          </div>
+          <div className={styles.headerSpacer}></div>
         </div>
-        <div className={styles.headerSpacer}></div>
+
+        {/* User Parameter Chips */}
+        <div className={styles.parameterRow}>
+          <div className={styles.paramChip}>🌍 {displayUser?.tribe || displayUser?.country || (currentCulture === 'fr' ? 'Général' : 'General')}</div>
+          <div className={styles.paramChip}>🎯 {displayUser?.goal === 'lose' ? (currentCulture === 'fr' ? 'Perte de poids' : 'Weight Loss') : displayUser?.goal === 'gain' ? (currentCulture === 'fr' ? 'Prise de poids' : 'Weight Gain') : (currentCulture === 'fr' ? 'Maintien' : 'Maintain')}</div>
+          <div className={styles.paramChip}>💰 {dailyPlan.budgetTier === 'low' ? (currentCulture === 'fr' ? 'Économique' : 'Economy') : dailyPlan.budgetTier === 'flexible' ? (currentCulture === 'fr' ? 'Premium' : 'Premium') : (currentCulture === 'fr' ? 'Standard' : 'Standard')}</div>
+          <div className={styles.paramChip}>🔥 {goals.calorieGoal} kcal {currentCulture === 'fr' ? 'objectif' : 'target'}</div>
+        </div>
+
+        {/* Filter Pills Category Row (Matches the reference image header layout!) */}
+        <div className={styles.filterPillsRow}>
+          {filterTabs.map((tab) => (
+            <button
+              key={tab.id}
+              className={`${styles.filterPill} ${activeFilter === tab.id ? styles.activeFilterPill : ''}`}
+              onClick={() => setActiveFilter(tab.id)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* parameters cards info */}
-      <div className={styles.parameterRow}>
-        <div className={styles.paramChip}>🌍 {displayUser?.tribe || displayUser?.country || (currentCulture === 'fr' ? 'Général' : 'General')}</div>
-        <div className={styles.paramChip}>🎯 {displayUser?.goal === 'lose' ? (currentCulture === 'fr' ? 'Perte de poids' : 'Weight Loss') : displayUser?.goal === 'gain' ? (currentCulture === 'fr' ? 'Prise de poids' : 'Weight Gain') : (currentCulture === 'fr' ? 'Maintien' : 'Maintain')}</div>
-        <div className={styles.paramChip}>💰 {dailyPlan.budgetTier === 'low' ? (currentCulture === 'fr' ? 'Économique' : 'Economy') : dailyPlan.budgetTier === 'flexible' ? (currentCulture === 'fr' ? 'Premium' : 'Premium') : (currentCulture === 'fr' ? 'Standard' : 'Standard')}</div>
-        <div className={styles.paramChip}>🔥 {goals.calorieGoal} kcal {currentCulture === 'fr' ? 'objectif' : 'target'}</div>
-      </div>
-
-      {/* Detailed Timeline list */}
-      <div className={styles.timeline}>
-        {dailyPlan.plan.map((slot, idx) => {
-          const logged = isMealLogged(slot.name)
-          const isLoading = logSuggestedLoading === idx
-          return (
-            <div key={idx} className={`${styles.timelineSlot} ${logged ? styles.timelineSlotLogged : ''}`}>
-              <div className={styles.timelineDotCol}>
-                <div className={`${styles.timelineDot} ${styles[`dot_${slot.slotType}`]}`}>
-                  {logged && <CheckCircle2 size={14} color="white" />}
-                </div>
-                {idx < dailyPlan.plan.length - 1 && <div className={styles.timelineLine}></div>}
-              </div>
-              <div className={styles.timelineCard}>
-                <div className={styles.timelineCardTop}>
+      {/* Scrollable Bottom List Section */}
+      <div className={styles.scrollContent}>
+        <div className={styles.mealList}>
+          {filteredPlan.length === 0 ? (
+            <div className={styles.emptyState}>
+              <p>{currentCulture === 'fr' ? 'Aucun repas trouvé pour cette catégorie.' : 'No meals found for this category.'}</p>
+            </div>
+          ) : (
+            filteredPlan.map((slot, idx) => {
+              const logged = isMealLogged(slot.name)
+              const isLoading = logSuggestedLoading === idx
+              return (
+                <div key={idx} className={`${styles.mealCard} ${logged ? styles.mealCardLogged : ''}`}>
+                  {/* Left Meal Image Thumbnail */}
                   <MealImage
                     mealName={slot.name}
                     imageUrl={slot.image}
-                    className={styles.timelineCardImg}
+                    className={styles.mealCardImg}
                   />
-                  <div className={styles.timelineCardInfo}>
-                    <div className={styles.timelineSlotMeta}>
-                      <span className={styles.timelineTime}>{slot.time}</span>
-                      <span className={`${styles.timelineSlotBadge} ${styles[`slotBadge_${slot.slotType}`]}`}>{slot.slotLabel || slot.label}</span>
+
+                  {/* Right Meal Info Content */}
+                  <div className={styles.mealCardInfo}>
+                    <div className={styles.mealMetaRow}>
+                      <span className={`${styles.slotBadge} ${styles[`slotBadge_${slot.slotType}`]}`}>
+                        {slot.slotLabel || slot.label}
+                      </span>
+                      <span className={styles.mealTime}>{slot.time}</span>
                     </div>
-                    {/* Full unclipped meal name as requested by the user */}
-                    <h4 className={styles.timelineMealName}>{slot.name}</h4>
-                    <p className={styles.timelineMealDesc}>{slot.description}</p>
+
+                    <h4 className={styles.mealName}>{slot.name}</h4>
+                    <p className={styles.mealDesc}>{slot.description}</p>
+
+                    {/* Nutrient Macro Chips */}
+                    <div className={styles.nutrientRow}>
+                      <div className={styles.nutrientChip}>
+                        <Flame size={11} color="#FF4500" />
+                        <span>{slot.calories} kcal</span>
+                      </div>
+                      <div className={styles.nutrientChip}>
+                        <Dumbbell size={11} color="#27AE60" />
+                        <span>{slot.protein}g {currentCulture === 'fr' ? 'prot' : 'prot'}</span>
+                      </div>
+                      <div className={styles.nutrientChip}>
+                        <Wheat size={11} color="#2F80ED" />
+                        <span>{slot.carbs}g {currentCulture === 'fr' ? 'gluc' : 'carbs'}</span>
+                      </div>
+                      <div className={styles.nutrientChip}>
+                        <Droplet size={11} color="#F2C94C" />
+                        <span>{slot.fat}g {currentCulture === 'fr' ? 'lip' : 'fat'}</span>
+                      </div>
+                    </div>
+
+                    {/* Log Button */}
+                    <button
+                      className={`${styles.logBtn} ${logged ? styles.logBtnLogged : ''}`}
+                      onClick={() => !logged && handleLogSuggestedMeal(slot, idx)}
+                      disabled={isLoading || logged}
+                    >
+                      {logged
+                        ? (currentCulture === 'fr' ? '✓ Enregistré' : '✓ Logged')
+                        : isLoading
+                          ? (currentCulture === 'fr' ? 'Enregistrement...' : 'Logging...')
+                          : (currentCulture === 'fr' ? 'Enregistrer ce repas 🍽️' : 'Log This Meal 🍽️')}
+                    </button>
                   </div>
                 </div>
-                <div className={styles.timelineNutrients}>
-                  <div className={styles.nutrientChip}><Flame size={11} color="#FF4500" /><span>{slot.calories} kcal</span></div>
-                  <div className={styles.nutrientChip}><Dumbbell size={11} color="#FFD600" /><span>{slot.protein}g {currentCulture === 'fr' ? 'protéines' : 'protein'}</span></div>
-                  <div className={styles.nutrientChip}><Wheat size={11} color="#9C27B0" /><span>{slot.carbs}g {currentCulture === 'fr' ? 'glucides' : 'carbs'}</span></div>
-                  <div className={styles.nutrientChip}><Droplet size={11} color="#4CAF50" /><span>{slot.fat}g {currentCulture === 'fr' ? 'lipides' : 'fat'}</span></div>
-                </div>
-                <button
-                  className={`${styles.timelineLogBtn} ${logged ? styles.timelineLogBtnLogged : ''}`}
-                  onClick={() => !logged && handleLogSuggestedMeal(slot, idx)}
-                  disabled={isLoading || logged}
-                >
-                  {logged
-                    ? (currentCulture === 'fr' ? '✓ Enregistré' : '✓ Logged')
-                    : isLoading
-                      ? (currentCulture === 'fr' ? 'Enregistrement...' : 'Logging...')
-                      : (currentCulture === 'fr' ? 'Enregistrer ce repas 🍽️' : 'Log This Meal 🍽️')}
-                </button>
-              </div>
-            </div>
-          )
-        })}
-      </div>
+              )
+            })
+          )}
+        </div>
 
-      {/* Daily totals plan summary card */}
-      <div className={styles.timetableTotalCard}>
-        <span className={styles.timetableTotalLabel}>{currentCulture === 'fr' ? 'Total journalier recommandé' : 'Daily Recommended Total'}</span>
-        <div className={styles.timetableTotalRow}>
-          <div className={styles.totalChip}><strong>{dailyPlan.totalCalories}</strong> kcal</div>
-          <div className={styles.totalChip}><strong>{dailyPlan.totalProtein}g</strong> {currentCulture === 'fr' ? 'protéines' : 'protein'}</div>
-          <div className={styles.totalChip}><strong>{dailyPlan.totalCarbs}g</strong> {currentCulture === 'fr' ? 'glucides' : 'carbs'}</div>
-          <div className={styles.totalChip}><strong>{dailyPlan.totalFat}g</strong> {currentCulture === 'fr' ? 'lipides' : 'fat'}</div>
+        {/* Daily totals plan summary card at bottom of scroll area */}
+        <div className={styles.timetableTotalCard}>
+          <span className={styles.timetableTotalLabel}>{currentCulture === 'fr' ? 'Total journalier recommandé' : 'Daily Recommended Total'}</span>
+          <div className={styles.timetableTotalRow}>
+            <div className={styles.totalChip}><strong>{dailyPlan.totalCalories}</strong> kcal</div>
+            <div className={styles.totalChip}><strong>{dailyPlan.totalProtein}g</strong> {currentCulture === 'fr' ? 'protéines' : 'protein'}</div>
+            <div className={styles.totalChip}><strong>{dailyPlan.totalCarbs}g</strong> {currentCulture === 'fr' ? 'glucides' : 'carbs'}</div>
+            <div className={styles.totalChip}><strong>{dailyPlan.totalFat}g</strong> {currentCulture === 'fr' ? 'lipides' : 'fat'}</div>
+          </div>
         </div>
       </div>
     </div>

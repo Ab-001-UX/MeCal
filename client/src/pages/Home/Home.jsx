@@ -5,7 +5,7 @@ import styles from './Home.module.css'
 import HomeSkeleton from './HomeSkeleton.jsx'
 import axios from 'axios'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Dumbbell, Droplet, Wheat, Flame, Footprints, ChevronRight, ChevronDown, Calendar, Zap, ThumbsUp, Leaf, Trash2, Pencil, MoreVertical, Camera, CheckCircle2, Lightbulb, Sparkles, Sun, Moon } from 'lucide-react'
+import { Dumbbell, Droplet, Wheat, Flame, Footprints, ChevronRight, ChevronDown, Calendar, Zap, ThumbsUp, Leaf, Trash2, Pencil, MoreVertical, Camera, Utensils, CheckCircle2, Lightbulb, Sparkles, Sun, Moon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { getRecommendations } from '../../services/meal.service.js'
 import { logStepGoalReport } from '../../services/activity.service.js'
@@ -70,9 +70,9 @@ export function MealImage({ mealName, imageUrl, className, lang }) {
   if (hasError) {
     return (
       <div className={`${styles.imagePlaceholder} ${className}`}>
-        <Camera size={20} className={styles.placeholderIcon} />
-        <span className={styles.placeholderText}>{isFr ? 'Photo indisponible' : 'Meal photo unavailable'}</span>
-        <span className={styles.placeholderSubtext}>{isFr ? "L'IA n'a pas pu obtenir l'image" : 'AI could not get image'}</span>
+        <Utensils size={20} className={styles.placeholderIcon} />
+        <span className={styles.placeholderText}>{isFr ? 'Image indisponible' : 'Meal image unavailable'}</span>
+        <span className={styles.placeholderSubtext}>{isFr ? "Image non trouvée" : 'Image not found'}</span>
       </div>
     )
   }
@@ -85,9 +85,9 @@ export function MealImage({ mealName, imageUrl, className, lang }) {
     } else {
       return (
         <div className={`${styles.imagePlaceholder} ${className}`}>
-          <Camera size={20} className={styles.placeholderIcon} />
-          <span className={styles.placeholderText}>{isFr ? 'Photo indisponible' : 'Meal photo unavailable'}</span>
-          <span className={styles.placeholderSubtext}>{isFr ? "L'IA n'a pas pu obtenir l'image" : 'AI could not get image'}</span>
+          <Utensils size={20} className={styles.placeholderIcon} />
+          <span className={styles.placeholderText}>{isFr ? 'Image indisponible' : 'Meal image unavailable'}</span>
+          <span className={styles.placeholderSubtext}>{isFr ? "Image non trouvée" : 'Image not found'}</span>
         </div>
       )
     }
@@ -663,6 +663,36 @@ const getProgramDay = (createdAtStr) => {
   return Math.max(1, diffDays + 1)
 }
 
+export const calculateTotalProgramDays = (targetDuration, customTargetDuration) => {
+  const raw = String(customTargetDuration || targetDuration || '').toLowerCase().trim()
+  if (!raw) return 30
+
+  const match = raw.match(/\d+/)
+  const num = match ? parseInt(match[0], 10) : null
+
+  if (raw.includes('month')) {
+    const months = num || 1
+    return Math.min(365, Math.max(7, months * 30))
+  }
+  if (raw.includes('year')) {
+    const years = num || 1
+    return Math.min(365, Math.max(7, years * 365))
+  }
+  if (raw.includes('week')) {
+    const weeks = num || 1
+    return Math.min(365, Math.max(7, weeks * 7))
+  }
+  if (raw.includes('day')) {
+    const days = num || 30
+    return Math.min(365, Math.max(7, days))
+  }
+  if (num && !isNaN(num)) {
+    return Math.min(365, Math.max(7, num))
+  }
+
+  return 30
+}
+
 const formatDateLocal = (date) => {
   const y = date.getFullYear()
   const m = String(date.getMonth() + 1).padStart(2, '0')
@@ -682,6 +712,9 @@ export default function Home() {
   const isFrancophoneCountry = ['côte d\'ivoire', 'cote d\'ivoire', 'ivory coast', 'senegal', 'sénégal', 'benin', 'bénin', 'togo', 'cameroon', 'cameroun', 'guinea', 'guinée', 'mali', 'niger', 'burkina faso'].includes(user?.country?.toLowerCase() || '')
   const currentCulture = (language === 'fr' || isFrancophoneCountry) ? 'fr' : 'en'
   
+  const totalDays = calculateTotalProgramDays(displayUser?.targetDuration, displayUser?.customTargetDuration)
+  const activeDayRef = useRef(null)
+
   const {
     meals, setMeals,
     water, setWater,
@@ -708,6 +741,16 @@ export default function Home() {
       setSelectedDay(getProgramDay(user.createdAt))
     }
   }, [user?.createdAt])
+
+  useEffect(() => {
+    if (activeDayRef.current) {
+      activeDayRef.current.scrollIntoView({
+        behavior: 'smooth',
+        inline: 'center',
+        block: 'nearest'
+      })
+    }
+  }, [selectedDay, totalDays])
 
   const [activeTooltip, setActiveTooltip] = useState(null)
   const [activeMenu, setActiveMenu] = useState(null)
@@ -1156,7 +1199,7 @@ export default function Home() {
       {/* Program Day Selector */}
       <div className={styles.daySelectorCard}>
         <div className={styles.daysRow}>
-          {[...Array(30)].map((_, i) => {
+          {[...Array(totalDays)].map((_, i) => {
             const dayNum = i + 1;
             const isActive = dayNum === selectedDay;
             const isUnreached = dayNum > currentProgramDay;
@@ -1173,6 +1216,7 @@ export default function Home() {
             return (
               <div 
                 key={i} 
+                ref={isActive ? activeDayRef : null}
                 className={`${styles.dayItem} ${isActive ? styles.dayItemActive : ''} ${isUnreached ? styles.dayItemUnreached : ''}`}
                 onClick={() => !isUnreached && setSelectedDay(dayNum)}
               >
@@ -1647,7 +1691,7 @@ export default function Home() {
               {!isPastDay && (
                 <div className={styles.emptyStateActionRow}>
                   <button className={styles.emptyStateBtn} onClick={() => navigate('/scan')}>
-                    <Camera size={14} /> {t('scanWithCamera')}
+                    <Utensils size={14} /> {t('scanWithCamera')}
                   </button>
                 </div>
               )}

@@ -65,7 +65,7 @@
   "kcalBurned": "{{calories}} kcal brûlées",
   "noMealsLoggedTitle": "Aucun repas enregistré aujourd'hui",
   "noMealsLoggedText": "Vos repas enregistrés apparaîtront ici. Appuyez sur le bouton de la caméra ci-dessous pour enregistrer vos aliments en photo avec Gemini, ou enregistrez-les manuellement !",
-  "scanWithCamera": "Prendre une photo",
+  "scanWithCamera": "Enregistrer un repas",
   "meal": "Repas",
   "edit": "Modifier",
   "delete": "Supprimer",
@@ -195,14 +195,13 @@
   },
   "nav": {
     "home": "Accueil",
-    "scan": "Photo",
+    "scan": "Enregistrer un repas",
+    "logMeal": "Enregistrer un repas",
     "history": "Historique",
     "profile": "Profil"
   },
   "scan": {
-    "barcodePlaceholder": "Entrez le code-barres",
-    "barcodeLookup": "Rechercher le produit",
-    "barcodeHint": "Trouvez le code-barres sur l'emballage et entrez les chiffres.",
-    "barcodeNotFound": "Produit introuvable. Essayez la saisie manuelle."
+    "manual": "Saisie Manuelle",
+    "library": "Plats Enregistrés"
   }
 }

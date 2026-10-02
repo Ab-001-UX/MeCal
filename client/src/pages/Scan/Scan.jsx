@@ -1,29 +1,26 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useUiStore } from '../../store/uiStore'
-import { BrowserMultiFormatReader } from '@zxing/library'
 import { useUserStore } from '../../store/userStore'
 import styles from './Scan.module.css'
 import axios from 'axios'
 import { useTranslation } from 'react-i18next'
 import { queueOrExecute } from '../../utils/syncQueue.js'
-import { scanBarcode as scanBarcodeApi, getSavedMeals, saveMealToLibrary, removeSavedMeal } from '../../services/meal.service.js'
+import { getSavedMeals, saveMealToLibrary, removeSavedMeal } from '../../services/meal.service.js'
 import '../../i18n'
 import { useNavigate } from 'react-router-dom'
-import { Camera, X, Plus, Minus, Heart, ArrowLeft, Barcode, Image, Upload } from 'lucide-react'
+import { Plus, Minus, Heart, X, BookOpen, Utensils } from 'lucide-react'
 
 const i18n = {
   en: {
-    nutrition: "Nutrition",
-    scan: "Photo",
-    barcode: "Barcode",
-    manual: "Manual",
-    library: "Library",
-    fetching: "Fetching nutrition report",
+    nutrition: "Nutrition Breakdown",
+    manual: "Manual Log",
+    library: "Saved Foods",
+    fetching: "Calculating nutritional report",
     logMeal: "Log Your Meal",
-    manualInput: "Manual Input",
+    manualInput: "Manual Meal Entry",
     whatDidYouEat: "What did you eat?",
     portion: "Portion",
-    calculateLog: "Calculate & Log",
+    calculateLog: "Calculate Calories & Log",
     plate: "Plate(s)",
     bowl: "Bowl(s)",
     wrap: "Wrap(s)",
@@ -36,26 +33,22 @@ const i18n = {
     carbs: "Carbs",
     protein: "Protein",
     fats: "Fats",
-    fixResults: "Fix Results",
-    save: "Save",
-    cameraDenied: "Camera access denied or not available.",
-    tapLibrary: "Tap Library to upload or Manual to type.",
+    fixResults: "Edit Values",
+    save: "Confirm & Save Log",
     cancel: "Cancel",
-    saveEdits: "Save Edits",
+    saveEdits: "Save Changes",
     editInstruction: "Edit the food name, calories and macros below:"
   },
   fr: {
-    nutrition: "Nutrition",
-    scan: "Photo",
-    barcode: "Code-barres",
-    manual: "Manuel",
-    library: "Bibliothèque",
-    fetching: "Récupération du rapport",
-    logMeal: "Enregistrer le repas",
-    manualInput: "Saisie manuelle",
+    nutrition: "Détails Nutritionnels",
+    manual: "Saisie Manuelle",
+    library: "Plats Enregistrés",
+    fetching: "Calcul du rapport nutritionnel",
+    logMeal: "Enregistrer Votre Repas",
+    manualInput: "Saisie Manuelle de Repas",
     whatDidYouEat: "Qu'avez-vous mangé ?",
     portion: "Portion",
-    calculateLog: "Calculer & Enregistrer",
+    calculateLog: "Calculer les Calories & Enregistrer",
     plate: "Assiette(s)",
     bowl: "Bol(s)",
     wrap: "Emballage(s)",
@@ -68,12 +61,10 @@ const i18n = {
     carbs: "Glucides",
     protein: "Protéines",
     fats: "Lipides",
-    fixResults: "Corriger",
-    save: "Enregistrer",
-    cameraDenied: "Accès caméra refusé ou non disponible.",
-    tapLibrary: "Appuyez sur Bibliothèque pour importer ou Manuel pour taper.",
+    fixResults: "Modifier",
+    save: "Confirmer & Enregistrer",
     cancel: "Annuler",
-    saveEdits: "Enregistrer",
+    saveEdits: "Enregistrer les modifications",
     editInstruction: "Modifiez le nom de l'aliment, les calories et les macros ci-dessous :"
   }
 }
@@ -81,29 +72,29 @@ const i18n = {
 const CULTURAL_METADATA = {
   en: {
     categories: [
-      { value: 'other', label: 'Other Foods' },
-      { value: 'swallow', label: 'Swallow (e.g., Eba, Amala, Pounded Yam)' },
-      { value: 'rice', label: 'Rice & Grains (e.g., Jollof, Fried Rice)' },
-      { value: 'soups', label: 'Soups & Stews' },
-      { value: 'tubers', label: 'Tubers & Plantain' }
+      { value: 'other', label: 'Other Foods & Snacks' },
+      { value: 'swallow', label: 'Swallow (e.g., Eba, Amala, Pounded Yam, Fufu)' },
+      { value: 'rice', label: 'Rice & Grains (e.g., Jollof, Fried Rice, Waakye)' },
+      { value: 'soups', label: 'Soups & Stews (e.g., Egusi, Okra, Ewedu)' },
+      { value: 'tubers', label: 'Tubers & Plantain (e.g., Dodo, Yam, Boli)' }
     ],
-    units: ['Plate(s)', 'Bowl(s)', 'Wrap(s)', 'Piece(s)', 'Spoon(s)', 'Catering Spoon(s)', 'DeRica(s)', 'Mudu(s)', 'Tin(s)', 'Gram(s)'],
+    units: ['Plate(s)', 'Bowl(s)', 'Wrap(s)', 'Piece(s)', 'Spoon(s)', 'Catering Spoon(s)', 'DeRica(s)', 'Mudu(s)', 'Gram(s)'],
     proteins: ['Beef', 'Chicken', 'Goat Meat', 'Ponmo / Shaki / Assorted', 'Fried Fish', 'Smoked Fish', 'Egg'],
     soupLabel: 'What soup or stew did you eat it with?',
-    soupPlaceholder: 'e.g., Egusi, Okra, Ewedu',
+    soupPlaceholder: 'e.g., Egusi, Okra, Ewedu, Pepper Soup',
     proteinLabel: 'What protein did you add?',
     oilLabel: 'How oily was the soup/stew?',
     oilOptions: ['Light Oil', 'Normal Oil', 'Floating / Heavy Oil']
   },
   fr: {
     categories: [
-      { value: 'other', label: 'Autres' },
-      { value: 'swallow', label: 'Pâtes / Boules (e.g., Foutou, Plakali, Kabato)' },
-      { value: 'rice', label: 'Riz & Céréales (e.g., Riz Gras, Thiéboudienne)' },
-      { value: 'soups', label: 'Sauces' },
-      { value: 'tubers', label: 'Tubercules & Bananes (e.g., Alloco, Igname)' }
+      { value: 'other', label: 'Autres aliments & snacks' },
+      { value: 'swallow', label: 'Pâtes / Boules (e.g., Foutou, Plakali, Kabato, Eba)' },
+      { value: 'rice', label: 'Riz & Céréales (e.g., Riz Gras, Thiéboudienne, Garba)' },
+      { value: 'soups', label: 'Sauces (e.g., Sauce Graine, Sauce Arachide, Kopè)' },
+      { value: 'tubers', label: 'Tubercules & Bananes (e.g., Alloco, Igname, Boli)' }
     ],
-    units: ['Assiette(s)', 'Bol(s)', 'Morceau(x)', 'Cuillère(s)', 'Louche(s)', 'Poignée(s)', 'Tas', 'Gramme(s)'],
+    units: ['Assiette(s)', 'Bol(s)', 'Morceau(x)', 'Cuillère(s)', 'Louche(s)', 'Poignée(s)', 'Gramme(s)'],
     proteins: ['Poisson frit (Fried fish)', 'Poisson fumé (Smoked fish)', 'Poulet bicyclette', 'Viande de bœuf', 'Viande de brousse', 'Œuf'],
     soupLabel: 'Avec quelle sauce l\'avez-vous mangé ?',
     soupPlaceholder: 'e.g., Sauce Graine, Sauce Arachide, Sauce Kopè',
@@ -139,18 +130,15 @@ export default function Scan() {
   const { t } = useTranslation()
   const { language, error, setError, clearError } = useUiStore()
   const { user } = useUserStore()
+  const navigate = useNavigate()
   
-  // Detect if Francophone based on user country or language setting
   const isFrancophoneCountry = ['côte d\'ivoire', 'cote d\'ivoire', 'ivory coast', 'senegal', 'sénégal', 'benin', 'bénin', 'togo', 'cameroon', 'cameroun', 'guinea', 'guinée', 'mali', 'niger', 'burkina faso'].includes(user?.country?.toLowerCase() || '')
   const currentCulture = (language === 'fr' || isFrancophoneCountry) ? 'fr' : 'en'
 
-  const [isScanning, setIsScanning] = useState(true)
+  const [activeTab, setActiveTab] = useState('manual')
   const [showResults, setShowResults] = useState(false)
-  const [capturedImage, setCapturedImage] = useState(null)
   const [scanResult, setScanResult] = useState(null)
   const [quantity, setQuantity] = useState(1)
-  const [activeTab, setActiveTab] = useState('scan') // scan, barcode, manual, library
-  const [cameraError, setCameraError] = useState(false)
   const [isFavorite, setIsFavorite] = useState(false)
   const [savedMeals, setSavedMeals] = useState([])
   const [showToast, setShowToast] = useState(false)
@@ -158,7 +146,6 @@ export default function Scan() {
   const [animateCircles, setAnimateCircles] = useState(false)
   const [localLoading, setLocalLoading] = useState(false)
   const [loadingActionText, setLoadingActionText] = useState('')
-  const [barcodeValue, setBarcodeValue] = useState('')
 
   // Inline edit states for fixing scan results
   const [isEditingResults, setIsEditingResults] = useState(false)
@@ -167,16 +154,6 @@ export default function Scan() {
   const [editedCarbs, setEditedCarbs] = useState(0)
   const [editedProtein, setEditedProtein] = useState(0)
   const [editedFat, setEditedFat] = useState(0)
-
-  useEffect(() => {
-    if (scanResult) {
-      setEditedFoodName(scanResult.foodName || '')
-      setEditedCalories(scanResult.calories || 0)
-      setEditedCarbs(scanResult.carbs || 0)
-      setEditedProtein(scanResult.protein || 0)
-      setEditedFat(scanResult.fat || 0)
-    }
-  }, [scanResult])
 
   // Manual entry states
   const [manualFoodName, setManualFoodName] = useState('')
@@ -191,6 +168,16 @@ export default function Scan() {
   const [manualAdditional, setManualAdditional] = useState('')
   const [manualMealType, setManualMealType] = useState('breakfast')
   const [resultMealType, setResultMealType] = useState('breakfast')
+
+  useEffect(() => {
+    if (scanResult) {
+      setEditedFoodName(scanResult.foodName || '')
+      setEditedCalories(scanResult.calories || 0)
+      setEditedCarbs(scanResult.carbs || 0)
+      setEditedProtein(scanResult.protein || 0)
+      setEditedFat(scanResult.fat || 0)
+    }
+  }, [scanResult])
 
   useEffect(() => {
     const culture = currentCulture === 'fr' ? 'fr' : 'en'
@@ -216,6 +203,19 @@ export default function Scan() {
     setIsFavorite(match)
   }, [scanResult?.foodName, savedMeals])
 
+  useEffect(() => {
+    if (showResults) {
+      const timer = setTimeout(() => setAnimateCircles(true), 300)
+      return () => clearTimeout(timer)
+    } else {
+      setAnimateCircles(false)
+    }
+  }, [showResults])
+
+  useEffect(() => {
+    if (clearError) clearError()
+  }, [activeTab])
+
   const handleFavorite = async () => {
     if (!scanResult?.foodName) return
     try {
@@ -226,7 +226,7 @@ export default function Scan() {
         if (existing) await removeSavedMeal(existing.id)
         setSavedMeals((prev) => prev.filter((m) => m.id !== existing?.id))
         setIsFavorite(false)
-        setToastMessage('Meal removed from saved foods')
+        setToastMessage(currentCulture === 'fr' ? 'Plat retiré des favoris' : 'Meal removed from saved foods')
       } else {
         const res = await saveMealToLibrary({
           name: scanResult.foodName,
@@ -239,168 +239,14 @@ export default function Scan() {
         if (res.data.success) {
           setSavedMeals((prev) => [...prev, res.data.data])
           setIsFavorite(true)
-          setToastMessage('Meal saved to your library')
+          setToastMessage(currentCulture === 'fr' ? 'Plat sauvegardé dans votre bibliothèque' : 'Meal saved to your library')
         }
       }
       setShowToast(true)
       setTimeout(() => setShowToast(false), 2000)
     } catch {
-      setToastMessage('Could not update saved foods')
+      setToastMessage(currentCulture === 'fr' ? 'Impossible de mettre à jour les favoris' : 'Could not update saved foods')
       setShowToast(true)
-    }
-  }
-
-  // Trigger circle animation when results are shown
-  useEffect(() => {
-    if (showResults) {
-      const timer = setTimeout(() => setAnimateCircles(true), 300)
-      return () => clearTimeout(timer)
-    } else {
-      setAnimateCircles(false)
-    }
-  }, [showResults])
-
-  // Clear errors when changing tabs
-  useEffect(() => {
-    if (clearError) clearError()
-  }, [activeTab])
-  
-  const fileInputRef = useRef(null)
-  const cameraInputRef = useRef(null)
-  const barcodeFileInputRef = useRef(null)
-  const barcodeCameraInputRef = useRef(null)
-  const navigate = useNavigate()
-  const { setLoading } = useUiStore()
-
-  const [barcodeMode, setBarcodeMode] = useState('image') // 'image' or 'manual'
-
-  const performScan = async (image, currentTab) => {
-    setLocalLoading(true)
-    setLoadingActionText(currentCulture === 'fr' ? "Analyse de l'image du repas avec l'IA..." : "Analyzing meal photo with AI...")
-    setError('')
-    
-    try {
-      const response = await axios.post('/api/meal/scan', { image }, {
-        withCredentials: true
-      })
-      
-      if (response.data.success) {
-        const meal = response.data.data
-        setScanResult({
-          id: meal.id,
-          foodName: meal.name,
-          description: response.data.fallbackUsed ? 'Analyzed using standard nutrition values.' : 'AI analyzed successfully.',
-          imageUrl: meal.imageUrl,
-          calories: meal.calories,
-          carbs: meal.carbs,
-          protein: meal.protein,
-          fat: meal.fat,
-          confidence: response.data.confidence || 'Medium',
-          healthScore: 'N/A'
-        })
-        const hour = new Date().getHours()
-        let defaultType = 'breakfast'
-        if (hour >= 11 && hour < 16) {
-          defaultType = 'lunch'
-        } else if (hour >= 16 && hour < 20) {
-          defaultType = 'dinner'
-        } else if (hour >= 20 || hour < 5) {
-          defaultType = 'snack'
-        }
-        setResultMealType(defaultType)
-        setShowResults(true)
-      }
-    } catch (err) {
-      console.error('Scan failed:', err)
-      const errorMsg = err.response?.data?.message || 'Failed to scan food image. Please try library upload or manual entry.'
-      setError(errorMsg)
-      setIsScanning(true)
-    } finally {
-      setLocalLoading(false)
-    }
-  }
-
-  const handleBarcodeLookup = async (forcedCode, isFromImageUpload = false) => {
-    const codeVal = typeof forcedCode === 'string' ? forcedCode : barcodeValue
-    if (!codeVal.trim()) {
-      setError(currentCulture === 'fr' ? 'Le code-barres est requis' : 'Barcode is required')
-      return
-    }
-
-    setLocalLoading(true)
-    setLoadingActionText(currentCulture === 'fr' ? "Recherche du produit par code-barres..." : "Looking up product barcode...")
-    setError('')
-    try {
-      const response = await scanBarcodeApi(codeVal.trim())
-      if (response.data.success) {
-        const meal = response.data.data
-        setScanResult({
-          id: meal.id,
-          foodName: meal.name,
-          description: response.data.servingNote || '',
-          imageUrl: meal.imageUrl,
-          calories: meal.calories,
-          carbs: meal.carbs,
-          protein: meal.protein,
-          fat: meal.fat,
-          healthScore: 'N/A'
-        })
-        const hour = new Date().getHours()
-        let defaultType = 'breakfast'
-        if (hour >= 11 && hour < 16) {
-          defaultType = 'lunch'
-        } else if (hour >= 16 && hour < 20) {
-          defaultType = 'dinner'
-        } else if (hour >= 20 || hour < 5) {
-          defaultType = 'snack'
-        }
-        setResultMealType(defaultType)
-        setCapturedImage(meal.imageUrl)
-        setIsScanning(false)
-        setShowResults(true)
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || (currentCulture === 'fr' ? 'Produit non trouvé' : 'Barcode not found'))
-      // If the product lookup failed and it was from an image upload, reset/keep mode as 'image' and clear captured image
-      if (isFromImageUpload) {
-        setBarcodeMode('image')
-        setCapturedImage(null)
-      }
-    } finally {
-      setLocalLoading(false)
-    }
-  }
-
-  const handleBarcodeImage = (e) => {
-    const file = e.target.files[0]
-    if (!file) return
-
-    setLocalLoading(true)
-    setLoadingActionText(currentCulture === 'fr' ? "Décodage du code-barres..." : "Decoding product barcode...")
-    setError('')
-    
-    const reader = new FileReader()
-    reader.readAsDataURL(file)
-    reader.onloadend = async () => {
-      const imageDataUrl = reader.result
-      setCapturedImage(imageDataUrl)
-      
-      const codeReader = new BrowserMultiFormatReader()
-      try {
-        const result = await codeReader.decodeFromImageUrl(imageDataUrl)
-        if (result) {
-          const code = result.getText()
-          setBarcodeValue(code)
-          await handleBarcodeLookup(code, true)
-        }
-      } catch (err) {
-        console.error("Barcode decoding failed:", err)
-        setError(currentCulture === 'fr' ? 'Impossible de lire le code-barres. Essayez de le saisir manuellement.' : 'Could not read a valid barcode from the image. Please try typing it manually.')
-        setCapturedImage(null)
-        setBarcodeMode('manual') // Only redirect to manual/type mode when image is blurry / decoding fails
-      } finally {
-        setLocalLoading(false)
-      }
     }
   }
 
@@ -415,7 +261,7 @@ export default function Scan() {
     }
 
     setLocalLoading(true)
-    setLoadingActionText(currentCulture === 'fr' ? "Calcul de la valeur nutritionnelle du repas..." : "Calculating nutritional value for meal...")
+    setLoadingActionText(currentCulture === 'fr' ? "Calcul de la valeur nutritionnelle avec l'IA..." : "Calculating calorie and nutrition breakdown...")
     setError('')
 
     const payload = {
@@ -461,20 +307,49 @@ export default function Scan() {
         setScanResult({
           id: meal.id,
           foodName: meal.name,
-          description: response.data.fallbackUsed ? 'Analyzed using standard nutrition values.' : 'AI analyzed successfully.',
+          description: response.data.fallbackUsed ? 'Analyzed using regional nutritional values.' : 'Calculated via AI Nutrition Database.',
           imageUrl: meal.imageUrl,
           calories: meal.calories,
           carbs: meal.carbs,
           protein: meal.protein,
-          fat: meal.fat,
-          healthScore: 'N/A'
+          fat: meal.fat
         })
+        setResultMealType(manualMealType)
         setShowResults(true)
       }
     } catch (err) {
       console.error('Manual log failed:', err)
-      const errorMsg = err.response?.data?.message || 'Failed to log meal. Please try again.'
+      const errorMsg = err.response?.data?.message || 'Failed to calculate meal calories. Please try again.'
       setError(errorMsg)
+    } finally {
+      setLocalLoading(false)
+    }
+  }
+
+  const handleLogSavedMeal = async (savedMeal) => {
+    setLocalLoading(true)
+    setLoadingActionText(currentCulture === 'fr' ? "Enregistrement du repas..." : "Logging meal...")
+    try {
+      const response = await axios.post('/api/meal/manual', {
+        foodName: savedMeal.name,
+        calories: savedMeal.calories,
+        protein: savedMeal.protein,
+        carbs: savedMeal.carbs,
+        fat: savedMeal.fat,
+        imageUrl: savedMeal.imageUrl,
+        type: manualMealType
+      }, { withCredentials: true })
+
+      if (response.data.success) {
+        setToastMessage(currentCulture === 'fr' ? `Repas "${savedMeal.name}" enregistré ! 🥗` : `Logged "${savedMeal.name}" to your journal! 🥗`)
+        setShowToast(true)
+        setTimeout(() => {
+          setShowToast(false)
+          navigate('/home')
+        }, 1500)
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to log saved meal.')
     } finally {
       setLocalLoading(false)
     }
@@ -524,19 +399,6 @@ export default function Scan() {
     }
   }
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0]
-    if (!file) return
-
-    const reader = new FileReader()
-    reader.readAsDataURL(file)
-    reader.onloadend = () => {
-      setCapturedImage(reader.result)
-      setIsScanning(false)
-      performScan(reader.result, 'library')
-    }
-  }
-
   const handleSave = async () => {
     if (!scanResult?.id) {
       navigate('/home')
@@ -544,7 +406,7 @@ export default function Scan() {
     }
 
     setLocalLoading(true)
-    setLoadingActionText(currentCulture === 'fr' ? "Enregistrement du repas..." : "Saving meal slot...")
+    setLoadingActionText(currentCulture === 'fr' ? "Enregistrement final..." : "Saving meal log...")
     setError('')
 
     try {
@@ -561,8 +423,7 @@ export default function Scan() {
       })
       navigate('/home')
     } catch (err) {
-      console.error('Failed to save final meal type:', err)
-      // fallback to navigate so user isn't stuck
+      console.error('Failed to save final meal log:', err)
       navigate('/home')
     } finally {
       setLocalLoading(false)
@@ -571,13 +432,13 @@ export default function Scan() {
 
   return (
     <div className={styles.container}>
-      {/* Header with Back button */}
+      {/* Top Header */}
       <div className={styles.topBar}>
         <button className={styles.backBtn} onClick={() => navigate(-1)}>
           <X size={24} color="white" />
         </button>
         <span className={styles.topBarTitle}>
-          {showResults ? i18n[currentCulture].nutrition : (currentCulture === 'fr' ? 'Journal Photo' : 'Photo Log')}
+          {showResults ? i18n[currentCulture].nutrition : (currentCulture === 'fr' ? 'Enregistrer un Repas' : 'Log Meal')}
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           {showResults ? (
@@ -602,135 +463,39 @@ export default function Scan() {
 
       {/* Main Content Area */}
       <div className={styles.contentArea}>
-        {isScanning && activeTab === 'scan' && (
-          <div className={styles.scanTabWrapper}>
-            <div className={styles.scannerPromptCard}>
-              <div className={styles.scannerIconBox}>
-                <Camera size={48} className={styles.scannerIcon} />
-              </div>
-              <h3>{currentCulture === 'fr' ? 'Prenez en Photo Votre Repas' : 'Log Meal with Photo'}</h3>
-              <p>{currentCulture === 'fr' ? 'Prenez une photo de votre repas ou choisissez une image pour analyser sa composition.' : 'Take a photo of your food or choose an image from your library to analyze its components with AI.'}</p>
-              <div className={styles.scannerButtonGroup}>
-                <button 
-                  type="button" 
-                  className={styles.captureCardBtn}
-                  onClick={() => cameraInputRef.current.click()}
-                >
-                  📸 {currentCulture === 'fr' ? 'Prendre une Photo' : 'Take Photo'}
-                </button>
-                <button 
-                  type="button" 
-                  className={styles.libraryCardBtn}
-                  onClick={() => fileInputRef.current.click()}
-                >
-                  🖼️ {currentCulture === 'fr' ? 'Choisir de la Bibliothèque' : 'Choose from Library'}
-                </button>
-              </div>
-            </div>
+        {/* Tab Switcher */}
+        {!showResults && !localLoading && (
+          <div className={styles.tabsRow} style={{ margin: '12px 16px', display: 'flex', gap: '8px' }}>
+            <button 
+              className={`${styles.tabBtn} ${activeTab === 'manual' ? styles.activeTab : ''}`}
+              onClick={() => setActiveTab('manual')}
+              style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+            >
+              <Utensils size={16} />
+              <span>{i18n[currentCulture].manual}</span>
+            </button>
+            <button 
+              className={`${styles.tabBtn} ${activeTab === 'library' ? styles.activeTab : ''}`}
+              onClick={() => setActiveTab('library')}
+              style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+            >
+              <BookOpen size={16} />
+              <span>{i18n[currentCulture].library}</span>
+            </button>
           </div>
         )}
 
-        {isScanning && activeTab === 'barcode' && (
-          <div className={styles.barcodeTabWrapper}>
-            <div className={styles.barcodeToggleRow}>
-              <button 
-                type="button" 
-                onClick={() => setBarcodeMode('image')}
-                className={`${styles.barcodeToggleBtn} ${barcodeMode === 'image' ? styles.activeBarcodeToggleBtn : ''}`}
-              >
-                📷 {currentCulture === 'fr' ? 'Scanner Code' : 'Scan Barcode'}
-              </button>
-              <button 
-                type="button" 
-                onClick={() => setBarcodeMode('manual')}
-                className={`${styles.barcodeToggleBtn} ${barcodeMode === 'manual' ? styles.activeBarcodeToggleBtn : ''}`}
-              >
-                ⌨️ {currentCulture === 'fr' ? 'Saisir Code' : 'Type Code'}
-              </button>
-            </div>
-
-            {barcodeMode === 'image' ? (
-              <div className={styles.scannerPromptCard}>
-                <div className={styles.scannerIconBox}>
-                  <Barcode size={48} className={styles.scannerIcon} />
-                </div>
-                <h3>{currentCulture === 'fr' ? 'Scannez Code-barres' : 'Scan Product Barcode'}</h3>
-                <p>{currentCulture === 'fr' ? 'Prenez une photo du code-barres ou sélectionnez une image de votre bibliothèque.' : 'Snap a photo of the barcode or select an image from your library to auto-detect the product.'}</p>
-                <div className={styles.scannerButtonGroup}>
-                  <button 
-                    type="button" 
-                    className={styles.captureCardBtn}
-                    onClick={() => barcodeCameraInputRef.current.click()}
-                  >
-                    📸 {currentCulture === 'fr' ? 'Prendre une Photo' : 'Take Photo'}
-                  </button>
-                  <button 
-                    type="button" 
-                    className={styles.libraryCardBtn}
-                    onClick={() => barcodeFileInputRef.current.click()}
-                  >
-                    🖼️ {currentCulture === 'fr' ? 'Choisir de la Bibliothèque' : 'Choose Barcode Image'}
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className={styles.barcodeManualForm}>
-                <p className={styles.barcodeFormHint}>{t('scan.barcodeHint') || (currentCulture === 'fr' ? 'Entrez le code-barres à 8-14 chiffres figurant sur l\'emballage.' : 'Enter the 8 to 14 digit barcode printed on the product packaging.')}</p>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  placeholder={t('scan.barcodePlaceholder') || 'e.g. 7613035777174'}
-                  className={styles.formInput}
-                  value={barcodeValue}
-                  onChange={(e) => setBarcodeValue(e.target.value)}
-                  style={{ width: '100%' }}
-                />
-                <button
-                  type="button"
-                  className={styles.submitBtn}
-                  style={{ width: '100%', marginTop: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
-                  onClick={() => handleBarcodeLookup()}
-                  disabled={localLoading}
-                >
-                  {localLoading ? (
-                    <>
-                      <span className="mini-spinner" />
-                      <span>{currentCulture === 'fr' ? 'Recherche en cours...' : 'Looking up Product...'}</span>
-                    </>
-                  ) : (
-                    t('scan.barcodeLookup') || (currentCulture === 'fr' ? 'Rechercher le produit' : 'Lookup Product')
-                  )}
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {(!isScanning || activeTab !== 'scan') && capturedImage && (
-          <div className={styles.previewWrapper}>
-            <img src={scanResult?.imageUrl || capturedImage} alt="Captured" className={styles.previewImage} />
-          </div>
-        )}
-
-        {/* Manual Input Full Page */}
-        {activeTab === 'manual' && (
+        {/* Manual Input Tab */}
+        {activeTab === 'manual' && !showResults && (
           <div className={styles.fullPageManual}>
-            <div className={styles.manualHeader}>
-              <button onClick={() => setActiveTab('scan')} className={styles.backBtn}>
-                <ArrowLeft size={24} />
-              </button>
-              <h2>{currentCulture === 'fr' ? 'Saisie Manuelle' : 'Manual Input'}</h2>
-              <div style={{ width: '40px' }}></div>
-            </div>
-            
             <div className={styles.manualFormContent} style={{ overflowY: 'auto', flex: 1, paddingBottom: '20px' }}>
               <div className={styles.manualFormHeader}>
                 <h3>{currentCulture === 'fr' ? 'Enregistrer Votre Repas' : 'Log Your Meal'}</h3>
-                <p>{currentCulture === 'fr' ? 'Saisissez manuellement les détails de votre repas.' : 'Enter the details of your meal manually.'}</p>
+                <p>{currentCulture === 'fr' ? 'Entrez ce que vous avez mangé et l\'IA calculera automatiquement vos calories et nutriments.' : 'Select your meal details below and AI will calculate your calories and macros.'}</p>
               </div>
               
               <div className={styles.formGroup}>
-                <label>{currentCulture === 'fr' ? "Type de repas / moment" : "Meal Slot / Period"}</label>
+                <label>{currentCulture === 'fr' ? "Moment du repas" : "Meal Slot / Period"}</label>
                 <select 
                   className={styles.formSelect}
                   value={manualMealType}
@@ -744,7 +509,7 @@ export default function Scan() {
               </div>
 
               <div className={styles.formGroup}>
-                <label>{currentCulture === 'fr' ? "Qu'avez-vous mangé ?" : "What did you eat?"}</label>
+                <label>{currentCulture === 'fr' ? "Qu'avez-vous mangé ?" : "What food category did you eat?"}</label>
                 <select 
                   className={styles.formSelect}
                   value={manualCategory}
@@ -762,7 +527,7 @@ export default function Scan() {
                   {/* Category-specific Food Name Question */}
                   <div className={styles.formGroup}>
                     <label>
-                      {manualCategory === 'swallow' && (currentCulture === 'fr' ? 'Quelle pâte/boule avez-vous mangé ?' : 'Which swallow did you eat?')}
+                      {manualCategory === 'swallow' && (currentCulture === 'fr' ? 'Quelle pâte/boule avez-vous mangée ?' : 'Which swallow did you eat?')}
                       {manualCategory === 'rice' && (currentCulture === 'fr' ? 'Quel type de riz ou de céréales avez-vous mangé ?' : 'Which rice or grain dish did you eat?')}
                       {manualCategory === 'soups' && (currentCulture === 'fr' ? 'Quelle sauce ou ragoût avez-vous mangé ?' : 'Which soup or stew did you eat?')}
                       {manualCategory === 'tubers' && (currentCulture === 'fr' ? 'Quel tubercule ou plat de banane avez-vous mangé ?' : 'Which tuber or plantain dish did you eat?')}
@@ -771,11 +536,11 @@ export default function Scan() {
                     <input 
                       type="text" 
                       placeholder={
-                        manualCategory === 'swallow' ? (currentCulture === 'fr' ? 'e.g. Foutou de bananes, Plakali' : 'e.g. Eba, Pounded Yam, Amala') :
-                        manualCategory === 'rice' ? (currentCulture === 'fr' ? 'e.g. Riz Gras, Thiéboudienne' : 'e.g. Jollof Rice, Fried Rice, White Rice') :
-                        manualCategory === 'soups' ? (currentCulture === 'fr' ? 'e.g. Sauce Graine, Sauce Kopè' : 'e.g. Egusi Soup, Okro Soup, Stew') :
-                        manualCategory === 'tubers' ? (currentCulture === 'fr' ? 'e.g. Alloco (banane frite), Igname bouillie' : 'e.g. Fried Plantain, Boiled Yam, Sweet Potato') :
-                        (currentCulture === 'fr' ? 'e.g. Chausson à la viande, Beignets' : 'e.g. Meat Pie, Puff Puff, Egg Roll')
+                        manualCategory === 'swallow' ? (currentCulture === 'fr' ? 'e.g. Foutou, Plakali, Eba, Amala' : 'e.g. Eba, Pounded Yam, Amala, Fufu') :
+                        manualCategory === 'rice' ? (currentCulture === 'fr' ? 'e.g. Riz Gras, Thiéboudienne, Garba' : 'e.g. Jollof Rice, Fried Rice, Waakye') :
+                        manualCategory === 'soups' ? (currentCulture === 'fr' ? 'e.g. Sauce Graine, Sauce Kopè, Egusi' : 'e.g. Egusi Soup, Okra Soup, Stew') :
+                        manualCategory === 'tubers' ? (currentCulture === 'fr' ? 'e.g. Alloco, Igname bouillie, Boli' : 'e.g. Fried Plantain (Dodo), Boiled Yam, Boli') :
+                        (currentCulture === 'fr' ? 'e.g. Beignets, Meat pie, Egg roll' : 'e.g. Meat Pie, Puff Puff, Egg Roll')
                       } 
                       className={styles.formInput} 
                       value={manualFoodName}
@@ -802,10 +567,10 @@ export default function Scan() {
                     </div>
                   )}
 
-                  {/* Portion Question - customized per category */}
+                  {/* Portion Question */}
                   <div className={styles.formRow}>
                     <div className={styles.formGroup} style={{ flex: 1 }}>
-                      <label>{currentCulture === 'fr' ? 'Portion' : 'Portion'}</label>
+                      <label>{currentCulture === 'fr' ? 'Portion' : 'Portion Quantity & Unit'}</label>
                       <div className={styles.portionGroup}>
                         <input 
                           type="number" 
@@ -842,22 +607,6 @@ export default function Scan() {
                     </div>
                   )}
 
-                  {/* Composite Toggle (French Rice Only) */}
-                  {currentCulture === 'fr' && manualCategory === 'rice' && (
-                    <div className={styles.formGroup} style={{ flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
-                      <input 
-                        type="checkbox" 
-                        id="compositeToggle"
-                        checked={isCompositeDish}
-                        onChange={(e) => setIsCompositeDish(e.target.checked)}
-                        style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--color-primary)' }}
-                      />
-                      <label htmlFor="compositeToggle" style={{ fontSize: '13px', color: '#555', cursor: 'pointer' }}>
-                        Plat composite / commun ? (e.g. Thiéboudienne, Garba)
-                      </label>
-                    </div>
-                  )}
-
                   {/* Oil Level Selector */}
                   {(manualCategory === 'swallow' || manualCategory === 'soups') && (
                     <div className={styles.formGroup}>
@@ -877,7 +626,7 @@ export default function Scan() {
                     </div>
                   )}
 
-                  {/* Proteins / Obstacles Selector */}
+                  {/* Proteins Selector */}
                   {(manualCategory === 'swallow' || manualCategory === 'rice' || manualCategory === 'soups') && (
                     <div className={styles.formGroup}>
                       <label>{CULTURAL_METADATA[currentCulture].proteinLabel}</label>
@@ -908,7 +657,7 @@ export default function Scan() {
                   {/* Additional items section */}
                   <div className={styles.formGroup}>
                     <label>
-                      {currentCulture === 'fr' ? 'Quelque chose d\'autre en plus ? (e.g. Zobo, plantain frit, viande extra)' : 'Did you eat anything additional to it? (e.g. Zobo, extra meat, shrimp, dodo)'}
+                      {currentCulture === 'fr' ? 'Quelque chose d\'autre en plus ? (e.g. Zobo, dodo extra)' : 'Did you add any extra items? (e.g. Zobo, extra plantain, egg)'}
                     </label>
                     <input 
                       type="text" 
@@ -924,57 +673,66 @@ export default function Scan() {
               <button 
                 className={styles.submitBtn} 
                 onClick={handleManualSubmit} 
-                style={{ marginTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                style={{ marginTop: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                 disabled={localLoading}
               >
                 {localLoading ? (
                   <>
                     <span className="mini-spinner" />
-                    <span>{currentCulture === 'fr' ? 'Calcul en cours...' : 'Calculating & Logging...'}</span>
+                    <span>{i18n[currentCulture].fetching}</span>
                   </>
                 ) : (
-                  currentCulture === 'fr' ? 'Calculer & Enregistrer' : 'Calculate & Log'
+                  i18n[currentCulture].calculateLog
                 )}
               </button>
             </div>
           </div>
         )}
+
+        {/* Library / Saved Meals Tab */}
+        {activeTab === 'library' && !showResults && (
+          <div className={styles.libraryTabWrapper} style={{ padding: '16px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '12px' }}>
+              {currentCulture === 'fr' ? 'Plats Favoris & Enregistrés' : 'Saved Meals & Favorites'}
+            </h3>
+            {savedMeals.length === 0 ? (
+              <p style={{ color: '#888', fontSize: '14px', textAlign: 'center', margin: '40px 0' }}>
+                {currentCulture === 'fr' ? 'Aucun plat enregistré pour l\'instant. Enregistrez vos repas habituels pour les ajouter d\'un seul clic !' : 'No saved meals yet. Save your favorite daily meals to log them with 1 tap!'}
+              </p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {savedMeals.map((item) => (
+                  <div key={item.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: 'var(--color-surface, #fff)', border: '1px solid #eee', borderRadius: '12px' }}>
+                    <div>
+                      <div style={{ fontWeight: 'bold', fontSize: '15px' }}>{item.name}</div>
+                      <div style={{ fontSize: '12.5px', color: '#666' }}>{item.calories} kcal • {item.protein}g Protein</div>
+                    </div>
+                    <button 
+                      onClick={() => handleLogSavedMeal(item)}
+                      style={{ padding: '8px 14px', background: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer' }}
+                    >
+                      + {currentCulture === 'fr' ? 'Ajouter' : 'Log'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Bottom Sheet / Controls */}
-      {localLoading ? (
+      {/* Loading Overlay */}
+      {localLoading && (
         <div className={styles.loadingSheet}>
           <div className={styles.spinnerWrapper}>
             <div className={styles.orangeSpinner}></div>
           </div>
           <p className={styles.loadingText}>{loadingActionText || i18n[currentCulture].fetching}</p>
         </div>
-      ) : !showResults ? (
-        <div className={styles.controlsWrapper}>
-          {/* Options Tabs */}
-          <div className={styles.tabsRow}>
-              <button 
-                className={`${styles.tabBtn} ${activeTab === 'scan' ? styles.activeTab : ''}`}
-                onClick={() => setActiveTab('scan')}
-              >
-                {i18n[currentCulture].scan}
-              </button>
-              <button 
-                className={`${styles.tabBtn} ${activeTab === 'barcode' ? styles.activeTab : ''}`}
-                onClick={() => setActiveTab('barcode')}
-              >
-                {i18n[currentCulture].barcode}
-              </button>
-              <button 
-                className={`${styles.tabBtn} ${activeTab === 'manual' ? styles.activeTab : ''}`}
-                onClick={() => setActiveTab('manual')}
-              >
-                {i18n[currentCulture].manual}
-              </button>
-          </div>
-        </div>
-      ) : (
-        /* Results View */
+      )}
+
+      {/* Results View */}
+      {showResults && !localLoading && (
         <div className={styles.resultsSheet}>
           <div className={styles.sheetHeader}>
             <div className={styles.quantityRow}>
@@ -1000,89 +758,27 @@ export default function Scan() {
                 style={{ flex: 1, border: 'none', borderBottom: '1px solid #ddd', padding: '6px 0', fontSize: '18px', fontWeight: 'bold', background: 'transparent', outline: 'none' }}
                 placeholder={currentCulture === 'fr' ? "Nom du repas..." : "Name this meal..."}
               />
-              {editedFoodName && (
-                <button 
-                  onClick={() => {
-                    setEditedFoodName('')
-                    if (scanResult) scanResult.foodName = ''
-                  }} 
-                  style={{ background: 'transparent', border: 'none', padding: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                  title="Clear name"
-                >
-                  <X size={18} color="#999" />
-                </button>
-              )}
             </div>
             <p className={styles.foodDescription} style={{ padding: '0 10px', margin: '4px 0' }}>{scanResult?.description}</p>
-            {scanResult?.confidence && (
-              <p className={styles.confidenceBadge} style={{ alignSelf: 'flex-start', margin: '4px 10px' }}>
-                {t('scanConfidence', { level: scanResult.confidence })}
-              </p>
-            )}
           </div>
 
-          {/* Full Course Meal vs Snack Selector */}
+          {/* Slot selector */}
           <div className={styles.courseTypeGroup} style={{ padding: '0 20px', marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <label style={{ fontSize: '12.5px', fontWeight: '600', color: 'var(--color-text-secondary)', alignSelf: 'flex-start' }}>
-              {currentCulture === 'fr' ? 'S\'agit-il d\'un repas complet ou d\'un en-cas ?' : 'Is this a full course meal or a snack?'}
+              {currentCulture === 'fr' ? 'Moment du repas :' : 'Meal slot:'}
             </label>
-            <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
-              <button
-                type="button"
-                style={{
-                  flex: 1,
-                  padding: '10px',
-                  borderRadius: '8px',
-                  border: '1.5px solid',
-                  borderColor: resultMealType !== 'snack' ? 'var(--color-primary)' : '#ddd',
-                  background: resultMealType !== 'snack' ? 'rgba(224, 86, 253, 0.05)' : 'white',
-                  color: resultMealType !== 'snack' ? 'var(--color-primary)' : '#555',
-                  fontWeight: 'bold',
-                  fontSize: '13px',
-                  cursor: 'pointer'
-                }}
-                onClick={() => setResultMealType('lunch')}
-              >
-                🍽️ {currentCulture === 'fr' ? 'Repas Complet' : 'Full Course'}
-              </button>
-              <button
-                type="button"
-                style={{
-                  flex: 1,
-                  padding: '10px',
-                  borderRadius: '8px',
-                  border: '1.5px solid',
-                  borderColor: resultMealType === 'snack' ? 'var(--color-primary)' : '#ddd',
-                  background: resultMealType === 'snack' ? 'rgba(224, 86, 253, 0.05)' : 'white',
-                  color: resultMealType === 'snack' ? 'var(--color-primary)' : '#555',
-                  fontWeight: 'bold',
-                  fontSize: '13px',
-                  cursor: 'pointer'
-                }}
-                onClick={() => setResultMealType('snack')}
-              >
-                🍎 {currentCulture === 'fr' ? 'En-cas / Snack' : 'Snack'}
-              </button>
-            </div>
+            <select
+              value={resultMealType}
+              onChange={(e) => setResultMealType(e.target.value)}
+              className={styles.formSelect}
+              style={{ width: '100%', padding: '10px 14px', fontSize: '14px' }}
+            >
+              <option value="breakfast">{currentCulture === 'fr' ? '🍳 Petit-déjeuner' : '🍳 Breakfast'}</option>
+              <option value="lunch">{currentCulture === 'fr' ? '🍛 Déjeuner' : '🍛 Lunch'}</option>
+              <option value="dinner">{currentCulture === 'fr' ? '🍲 Dîner' : '🍲 Dinner'}</option>
+              <option value="snack">{currentCulture === 'fr' ? '🍎 Collation / Snack' : '🍎 Snack'}</option>
+            </select>
           </div>
-
-          {resultMealType !== 'snack' && (
-            <div className={styles.resultTypeGroup} style={{ padding: '0 20px', marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--color-text-secondary)', alignSelf: 'flex-start' }}>
-                {currentCulture === 'fr' ? 'Moment du repas :' : 'Which meal slot?'}
-              </label>
-              <select
-                value={resultMealType}
-                onChange={(e) => setResultMealType(e.target.value)}
-                className={styles.formSelect}
-                style={{ width: '100%', padding: '10px 14px', fontSize: '14px' }}
-              >
-                <option value="breakfast">{currentCulture === 'fr' ? '🍳 Petit-déjeuner' : '🍳 Breakfast'}</option>
-                <option value="lunch">{currentCulture === 'fr' ? '🍛 Déjeuner' : '🍛 Lunch'}</option>
-                <option value="dinner">{currentCulture === 'fr' ? '🍲 Dîner' : '🍲 Dinner'}</option>
-              </select>
-            </div>
-          )}
 
           {showToast && (
             <div className={styles.toast}>
@@ -1090,7 +786,7 @@ export default function Scan() {
             </div>
           )}
 
-          {/* Macros Grid with Circular Progress */}
+          {/* Macros Grid */}
           {isEditingResults ? (
             <div className={styles.macrosEditGrid}>
               <div className={styles.editMacroBox}>
@@ -1173,7 +869,7 @@ export default function Scan() {
                     <span>{scanResult ? scanResult.carbs * quantity : 0}g</span>
                   </div>
                 </div>
-                <span className={styles.macroLabel}>{i18n[currentCulture].carbs}</span>
+                <span className={styles.macroLabel}>{i18n[currentCulture].fats}</span>
               </div>
 
               {/* Protein */}
@@ -1242,40 +938,6 @@ export default function Scan() {
           </div>
         </div>
       )}
-
-      {/* Hidden Inputs for Food Scanning */}
-      <input 
-        type="file" 
-        accept="image/*" 
-        style={{ display: 'none' }} 
-        ref={fileInputRef}
-        onChange={handleFileChange}
-      />
-      <input 
-        type="file" 
-        accept="image/*" 
-        capture="environment"
-        style={{ display: 'none' }} 
-        ref={cameraInputRef}
-        onChange={handleFileChange}
-      />
-
-      {/* Hidden Inputs for Barcode Scanning */}
-      <input 
-        type="file" 
-        accept="image/*" 
-        style={{ display: 'none' }} 
-        ref={barcodeFileInputRef}
-        onChange={handleBarcodeImage}
-      />
-      <input 
-        type="file" 
-        accept="image/*" 
-        capture="environment"
-        style={{ display: 'none' }} 
-        ref={barcodeCameraInputRef}
-        onChange={handleBarcodeImage}
-      />
     </div>
   )
 }

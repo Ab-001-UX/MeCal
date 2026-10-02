@@ -335,6 +335,20 @@ export default function WellnessTips() {
             </div>
             <button
               className={styles.savedBtn}
+              onClick={() => {
+                setSyncing(true)
+                const shuffled = [...ALL_TIPS].sort(() => Math.random() - 0.5).slice(0, 10)
+                setApiTips(shuffled)
+                setApiSource('local')
+                setTimeout(() => setSyncing(false), 500)
+              }}
+              title={currentCulture === 'fr' ? 'Changer les articles' : 'Shuffle Articles'}
+              aria-label="Refresh articles"
+            >
+              <RefreshCw size={18} style={{ animation: syncing ? 'spin 1s linear infinite' : 'none' }} />
+            </button>
+            <button
+              className={styles.savedBtn}
               onClick={() => navigate('/saved-tips')}
               aria-label="Saved articles"
             >

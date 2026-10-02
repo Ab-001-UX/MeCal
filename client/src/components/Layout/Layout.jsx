@@ -2,7 +2,7 @@ import React from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import styles from './Layout.module.css'
-import { Home, Camera, BarChart2, User } from 'lucide-react'
+import { Home, Utensils, BarChart2, User } from 'lucide-react'
 import { SyncStatus } from '../SyncStatus/SyncStatus.jsx'
 
 export function Layout({ children }) {
@@ -24,8 +24,8 @@ export function Layout({ children }) {
             <span className={styles.navLabel}>{t('nav.home')}</span>
           </NavLink>
           <NavLink to="/scan" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>
-            <Camera size={20} />
-            <span className={styles.navLabel}>{t('nav.scan')}</span>
+            <Utensils size={20} />
+            <span className={styles.navLabel}>{t('nav.logMeal')}</span>
           </NavLink>
           <NavLink to="/analytics" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>
             <BarChart2 size={20} />

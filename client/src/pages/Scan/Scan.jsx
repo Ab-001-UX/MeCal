@@ -489,10 +489,55 @@ export default function Scan() {
         {activeTab === 'manual' && !showResults && (
           <div className={styles.fullPageManual}>
             <div className={styles.manualFormContent} style={{ overflowY: 'auto', flex: 1, paddingBottom: '20px' }}>
-              <div className={styles.manualFormHeader}>
-                <h3>{currentCulture === 'fr' ? 'Enregistrer Votre Repas' : 'Log Your Meal'}</h3>
-                <p>{currentCulture === 'fr' ? 'Entrez ce que vous avez mangé et l\'IA calculera automatiquement vos calories et nutriments.' : 'Select your meal details below and AI will calculate your calories and macros.'}</p>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px 0 6px 0', marginBottom: '4px' }}>
+                <button
+                  onClick={() => {
+                    if (window.history.length > 1) {
+                      navigate(-1)
+                    } else {
+                      navigate('/')
+                    }
+                  }}
+                  style={{
+                    position: 'absolute',
+                    left: 0,
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '8px',
+                    color: 'var(--color-text-primary)',
+                    borderRadius: '50%'
+                  }}
+                  aria-label="Go back"
+                >
+                  <ArrowLeft size={26} color="currentColor" />
+                </button>
+                <h3 style={{
+                  margin: 0,
+                  fontSize: '26px',
+                  fontWeight: '800',
+                  textAlign: 'center',
+                  color: 'var(--color-text-primary)',
+                  letterSpacing: '-0.02em',
+                  width: '100%',
+                  padding: '0 40px'
+                }}>
+                  {currentCulture === 'fr' ? 'Enregistrer Votre Repas' : 'Log Your Meal'}
+                </h3>
               </div>
+              <p style={{
+                textAlign: 'center',
+                color: 'var(--color-text-secondary)',
+                fontSize: '14px',
+                margin: '4px 0 18px 0',
+                padding: '0 16px',
+                lineHeight: 1.4
+              }}>
+                {currentCulture === 'fr' ? 'Entrez ce que vous avez mangé et l\'IA calculera automatiquement vos calories et nutriments.' : 'Select your meal details below and AI will calculate your calories and macros.'}
+              </p>
               
               <div className={styles.formGroup}>
                 <label>{currentCulture === 'fr' ? "Moment du repas" : "Meal Slot / Period"}</label>

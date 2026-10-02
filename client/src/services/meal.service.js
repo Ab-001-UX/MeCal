@@ -1,7 +1,7 @@
 import api from './api.js'
 
 export const getTodayMeals = () => api.get('/api/meal/today')
-export const getRecommendations = (lang) => api.get('/api/meal/recommendations', { params: { lang } })
+export const getRecommendations = (lang, date, day) => api.get('/api/meal/recommendations', { params: { lang, date, day } })
 export const logMeal = (data) => api.post('/api/meal/log', data)
 export const scanMeal = (image) => api.post('/api/meal/scan', { image })
 export const scanBarcode = (barcode) => api.post('/api/meal/barcode', { barcode })

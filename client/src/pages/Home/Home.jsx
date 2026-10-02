@@ -806,7 +806,7 @@ export default function Home() {
     fetchMeals(dateStr)
     fetchWater(dateStr)
     fetchTodayActivities(dateStr)
-    fetchAiRecommendations()
+    fetchAiRecommendations(dateStr, selectedDay)
     
     if (location.state?.showWelcomeModal) {
       triggerConfetti()
@@ -814,9 +814,9 @@ export default function Home() {
     }
   }, [location.state, language, selectedDay, user?.createdAt])
 
-  const fetchAiRecommendations = async () => {
+  const fetchAiRecommendations = async (dateStr, dayNum) => {
     try {
-      const response = await getRecommendations(language)
+      const response = await getRecommendations(language, dateStr, dayNum)
       if (response.data.success && response.data.data) {
         setAiMealPlan(response.data.data)
       }
@@ -830,7 +830,9 @@ export default function Home() {
   const handleRetryRecommendations = async () => {
     setIsRetrying(true)
     try {
-      const response = await getRecommendations(language)
+      const targetDate = getDateForDay(selectedDay)
+      const dateStr = formatDateLocal(targetDate)
+      const response = await getRecommendations(language, dateStr, selectedDay)
       if (response.data.success && response.data.data) {
         setAiMealPlan(response.data.data)
       }

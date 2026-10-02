@@ -281,7 +281,7 @@ Respond with ONLY the raw JSON array. No markdown, no code blocks, no explanatio
 // ── Controller ────────────────────────────────────────────────────────────────
 export async function getTodaysTips(req, res) {
   try {
-    const today    = new Date().toISOString().slice(0, 10)
+    const today    = req.query.date || new Date().toISOString().slice(0, 10)
     const cacheKey = `wellness:tips:groq:v2:${today}`
 
     // 1. Serve from Redis cache (same tips all day — only 1 Groq call per day)

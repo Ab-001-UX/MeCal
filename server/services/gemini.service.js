@@ -283,7 +283,7 @@ export async function generateWellnessSummary(profile, lang = 'en') {
   }
 }
 
-export async function getDailyMealPlan(profile, lang = 'en') {
+export async function getDailyMealPlan(profile, lang = 'en', dateStr = null, dayNum = null) {
   try {
     const calorieTarget = profile.calorieGoal || 2000;
     const stepTarget = profile.stepGoal || 7500;
@@ -291,9 +291,9 @@ export async function getDailyMealPlan(profile, lang = 'en') {
     const capacity = profile.waterPreference === 'bottle' ? 750 : 500;
     const waterTargetMl = waterTarget * capacity;
 
-    const todayDate = new Date();
+    const todayDate = dateStr ? new Date(dateStr) : new Date();
     const dayOfWeek = todayDate.toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { weekday: 'long' });
-    const dayIndex = todayDate.getDay(); // 0 to 6
+    const dayIndex = isNaN(todayDate.getDay()) ? new Date().getDay() : todayDate.getDay();
 
     const prompt = `
       Today's Date: ${todayDate.toDateString()} (${dayOfWeek})
@@ -367,41 +367,8 @@ export async function getDailyMealPlan(profile, lang = 'en') {
     const isFrancophone = lang === 'fr';
 
     const goal = (profile.goal || 'maintain').toLowerCase();
-    const dayIndex = new Date().getDay(); // 0 (Sun) to 6 (Sat)
-
-    // 7-Day Rotating Goal-Specific Fruit Pools
-    const fruitRotationLoss = [
-      { name: "Chilled Watermelon Slices", quantity: "2 medium slices", bestTime: "11:00 AM", idea: "Watermelon is highly hydrating and low in calories, perfect for weight loss.", emoji: "🍉" },
-      { name: "Crisp Cucumber & Garden Eggs", quantity: "1 cucumber + 2 garden eggs", bestTime: "11:00 AM", idea: "Extremely low in calories and rich in fiber to keep you full.", emoji: "🥒" },
-      { name: "Sweet Grapefruit Segments", quantity: "1 medium grapefruit", bestTime: "11:00 AM", idea: "Citrus fruits boost metabolism and support weight loss goals.", emoji: "🍊" },
-      { name: "Fresh Pawpaw (Papaya) Cubes", quantity: "1 cup diced pawpaw", bestTime: "4:00 PM", idea: "Papaya contains papain enzymes that aid digestion and reduce bloating.", emoji: "🥭" },
-      { name: "Local Star Apple (Agbalumo/Udara)", quantity: "2 medium star apples", bestTime: "11:00 AM", idea: "Low-calorie tangy local fruit rich in Vitamin C and fiber.", emoji: "🍎" },
-      { name: "Peeled Local Oranges", quantity: "2 whole oranges", bestTime: "11:00 AM", idea: "High-water citrus snack with natural fiber and immunity benefits.", emoji: "🍊" },
-      { name: "Fresh Guava Slices", quantity: "2 medium guavas", bestTime: "4:00 PM", idea: "Packed with fiber and Vitamin C with minimal glycemic impact.", emoji: "🍐" }
-    ];
-
-    const fruitRotationGain = [
-      { name: "Sweet Yellow Bananas", quantity: "2 medium bananas", bestTime: "4:00 PM", idea: "Nutrient-dense carbohydrates to help meet daily energy surplus.", emoji: "🍌" },
-      { name: "Fresh Coconut Flesh", quantity: "1 small piece mature coconut", bestTime: "4:00 PM", idea: "Rich in healthy fats and dense calories for weight gain.", emoji: "🥥" },
-      { name: "Matured Avocado with Honey", quantity: "Half a medium avocado", bestTime: "4:00 PM", idea: "Provides premium healthy monounsaturated fats and healthy calories.", emoji: "🥑" },
-      { name: "Sweet Dates & Peanuts", quantity: "5 dates + handful of peanuts", bestTime: "4:00 PM", idea: "High-calorie natural snack packed with energy and healthy fats.", emoji: "🌴" },
-      { name: "Dried Mango Strips", quantity: "Handful of dried mango", bestTime: "11:00 AM", idea: "Concentrated natural sugars and calories for sustained energy.", emoji: "🥭" },
-      { name: "Ripe Plantain Frittata Bite", quantity: "1 slice baked plantain frittata", bestTime: "4:00 PM", idea: "Delicious carbohydrate and protein booster.", emoji: "🍌" },
-      { name: "Sweet Cashew Apples & Bananas", quantity: "2 bananas + 1 cashew apple", bestTime: "4:00 PM", idea: "Calorie-dense fruit combination supporting weight gain.", emoji: "🍎" }
-    ];
-
-    const fruitRotationMaintain = [
-      { name: "Chilled Watermelon Slices", quantity: "2 medium slices", bestTime: "11:00 AM", idea: "Refreshing and hydrating snack for warm weather.", emoji: "🍉" },
-      { name: "Fresh Pawpaw (Papaya) Cubes", quantity: "1 cup diced pawpaw", bestTime: "4:00 PM", idea: "Promotes smooth digestion and gut health.", emoji: "🥭" },
-      { name: "Sweet Local Oranges", quantity: "2 whole oranges", bestTime: "11:00 AM", idea: "Rich in natural Vitamin C and dietary fiber.", emoji: "🍊" },
-      { name: "Fresh Pineapple Rings", quantity: "2 pineapple slices", bestTime: "4:00 PM", idea: "Contains bromelain enzyme for protein digestion.", emoji: "🍍" },
-      { name: "Guava & Apple Slices", quantity: "1 guava + half apple", bestTime: "11:00 AM", idea: "Balanced fiber and fruit vitamins for daily vitality.", emoji: "🍎" },
-      { name: "Local Mango Slices", quantity: "1 medium mango", bestTime: "4:00 PM", idea: "Sweet seasonal treat rich in Vitamin A.", emoji: "🥭" },
-      { name: "Fresh Coconut Water & Flesh", quantity: "1 small piece coconut", bestTime: "4:00 PM", idea: "Hydrating electrolytes and healthy fats.", emoji: "🥥" }
-    ];
-
-    const currentFruitPool = goal === 'lose' ? fruitRotationLoss : goal === 'gain' ? fruitRotationGain : fruitRotationMaintain;
-    const selectedFruit = currentFruitPool[dayIndex % currentFruitPool.length];
+    const rotationIndex = (dayNum !== null && dayNum !== undefined) ? (dayNum - 1) : (isNaN(dayIndex) ? 0 : dayIndex);
+    const selectedFruit = currentFruitPool[Math.abs(rotationIndex) % currentFruitPool.length];
 
     let fallbackPlan;
 
@@ -485,7 +452,7 @@ export async function getDailyMealPlan(profile, lang = 'en') {
           ]
         }
       ];
-      const selected = options[dayIndex % options.length];
+      const selected = options[Math.abs(rotationIndex) % options.length];
       fallbackPlan = {
         calorieGoal: calorieTarget,
         waterGoalMl: waterTargetMl,
@@ -576,7 +543,7 @@ export async function getDailyMealPlan(profile, lang = 'en') {
           ]
         }
       ];
-      const selected = options[dayIndex % options.length];
+      const selected = options[Math.abs(rotationIndex) % options.length];
       fallbackPlan = {
         calorieGoal: calorieTarget,
         waterGoalMl: waterTargetMl,
@@ -667,7 +634,7 @@ export async function getDailyMealPlan(profile, lang = 'en') {
           ]
         }
       ];
-      const selected = options[dayIndex % options.length];
+      const selected = options[Math.abs(rotationIndex) % options.length];
       fallbackPlan = {
         calorieGoal: calorieTarget,
         waterGoalMl: waterTargetMl,
@@ -758,7 +725,7 @@ export async function getDailyMealPlan(profile, lang = 'en') {
           ]
         }
       ];
-      const selected = options[dayIndex % options.length];
+      const selected = options[Math.abs(rotationIndex) % options.length];
       fallbackPlan = {
         calorieGoal: calorieTarget,
         waterGoalMl: waterTargetMl,

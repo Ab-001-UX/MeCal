@@ -94,7 +94,12 @@ export default function Timetable() {
   const fetchAiPlan = async () => {
     try {
       const culture = language === 'fr' ? 'fr' : 'en'
-      const response = await axios.get(`/api/meal/recommendations?lang=${culture}`, { withCredentials: true })
+      const today = new Date()
+      const y = today.getFullYear()
+      const m = String(today.getMonth() + 1).padStart(2, '0')
+      const d = String(today.getDate()).padStart(2, '0')
+      const dateStr = `${y}-${m}-${d}`
+      const response = await axios.get(`/api/meal/recommendations?lang=${culture}&date=${dateStr}`, { withCredentials: true })
       if (response.data.success && response.data.data) {
         setAiMealPlan(response.data.data)
         setLastFetchedDate(new Date().toDateString())

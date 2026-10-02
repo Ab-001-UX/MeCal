@@ -219,21 +219,233 @@ export const ALL_TIPS = [
       text: "Des études montrent que boire 500ml d'eau 20 à 30 minutes avant un repas augmente la satiété et réduit l'apport calorique de 13% en moyenne. L'estomac envoie des signaux de satiété basés sur le volume, pas seulement les calories. Un verre avant le riz jollof fait beaucoup.",
     },
   },
+  {
+    id: 15,
+    category: 'diet',
+    image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600&h=400&fit=crop',
+    en: {
+      title: 'Fonio — The Ancient Sahel Supergrain',
+      summary: 'Naturally gluten-free with a low glycemic index and vital amino acids.',
+      text: 'Fonio is one of Africa’s oldest cultivated cereals. Unlike white rice, it contains amino acids like methionine and cystine that aid liver function and muscle repair. It digests slowly, preventing the blood sugar spikes that trigger mid-day energy crashes.',
+    },
+    fr: {
+      title: 'Le Fonio — le super-grain ancestral du Sahel',
+      summary: 'Naturellement sans gluten avec un faible indice glycémique.',
+      text: 'Le fonio est l’une des plus anciennes céréales d’Afrique. Contrairement au riz blanc, il regorge de méthionine et de cystine, des acides aminés essentiels à la réparation musculaire et au foie. Sa digestion lente évite les coups de fatigue.',
+    },
+  },
+  {
+    id: 16,
+    category: 'diet',
+    image: 'https://images.unsplash.com/photo-1609780447631-05b93e5a88ea?w=600&h=400&fit=crop',
+    en: {
+      title: 'Baobab Powder — 10x More Vitamin C than Oranges',
+      summary: 'Add a spoonful to your water or smoothies for natural daily immunity.',
+      text: 'Wild baobab fruit dries naturally on the branch before harvest. The pulp contains nearly 10 times more Vitamin C by weight than fresh oranges, plus abundant soluble prebiotic pectin that nourishes healthy gut microbes.',
+    },
+    fr: {
+      title: 'La poudre de Baobab — 10x plus de Vitamine C',
+      summary: 'Ajoutez une cuillère à vos boissons pour stimuler votre immunité.',
+      text: 'La pulpe de fruit de baobab contient près de 10 fois plus de vitamine C que l’orange fraîche et regorge de fibres prébiotiques pectines pour fortifier la flore intestinale.',
+    },
+  },
+  {
+    id: 17,
+    category: 'hydration',
+    image: 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=600&h=400&fit=crop',
+    en: {
+      title: 'Tigernuts (Aya) — Resistant Starch Wonder',
+      summary: 'A natural prebiotic tuber that boosts gut health and steady energy.',
+      text: 'Despite their name, tigernuts (Ofio / Aki Hausa) are tiny root tubers. They are packed with resistant starch — a type of carbohydrate that bypasses stomach digestion and ferments in the colon, generating beneficial short-chain fatty acids.',
+    },
+    fr: {
+      title: 'Le Souchet (Tigernuts) — trésor prébiotique',
+      summary: 'Un tubercule naturel pour la digestion et une énergie constante.',
+      text: 'Le souchet (Aya / Ofio) est un petit tubercule riche en amidon résistant. Il nourrit le microbiote intestinal et procure une satiété durable sans faire grimper l’insuline.',
+    },
+  },
+  {
+    id: 18,
+    category: 'diet',
+    image: 'https://images.unsplash.com/photo-1544025162-d76538b88ea2?w=600&h=400&fit=crop',
+    en: {
+      title: 'Giant Land Snail — The Ultra-Lean Protein',
+      summary: 'Almost pure protein with zero saturated fat and rich iron reserves.',
+      text: 'African giant land snails contain over 16g of protein per 100g with less than 1.5% fat. They provide more iron than beef and are packed with magnesium and selenium. Peppered or in vegetable stew, they are top-tier fitness food.',
+    },
+    fr: {
+      title: 'L’Escargot géant — la protéine ultra-maigre',
+      summary: 'Riche en protéines pures, sans graisses saturées et gorgé de fer.',
+      text: 'L’escargot géant d’Afrique offre plus de 16g de protéines pour 100g avec seulement 1% de lipides. Il contient plus de fer assimilable que le bœuf et une excellente teneur en magnésium.',
+    },
+  },
+  {
+    id: 19,
+    category: 'diet',
+    image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&h=400&fit=crop',
+    en: {
+      title: 'Bitter Leaf (Ewuro / Ndole) for Blood Sugar',
+      summary: 'The bitter peptides stimulate bile flow and healthy glucose uptake.',
+      text: 'The characteristic bitterness of Vernonia amygdalina comes from andrographolide and sesquiterpene lactones. These natural compounds stimulate insulin receptors and support bile production in the liver, helping clear dietary fats smoothly.',
+    },
+    fr: {
+      title: 'Feuille Amère (Ewuro / Ndolé) et glycémie',
+      summary: 'Les principes amers stimulent le foie et la régulation du glucose.',
+      text: 'L’amertume naturelle de la feuille de vernonia contient des composés bioactifs qui améliorent la sensibilité à l’insuline et stimulent la production biliaire pour digérer les graisses.',
+    },
+  },
+  {
+    id: 20,
+    category: 'diet',
+    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&h=400&fit=crop',
+    en: {
+      title: 'Ukwa (African Breadfruit) — Potassium Power',
+      summary: 'High potassium and plant sterols support healthy blood pressure.',
+      text: 'Ukwa seeds are a nutritional powerhouse eaten across southeastern Nigeria. Rich in potassium, riboflavin, and complex carbs, a bowl of ukwa porridge supports arterial relaxation and supplies sustained athletic fuel.',
+    },
+    fr: {
+      title: 'Ukwa (Fruit à pain africain) — force et potassium',
+      summary: 'Riche en potassium et stérols végétaux pour la santé cardiaque.',
+      text: 'Les graines d’Ukwa cuites en potage apportent des glucides complexes, du potassium et des vitamines B qui favorisent l’endurance et la détente artérielle.',
+    },
+  },
+  {
+    id: 21,
+    category: 'diet',
+    image: 'https://images.unsplash.com/photo-1565299543923-37de65d01a8c?w=600&h=400&fit=crop',
+    en: {
+      title: 'Moringa Leaf — Nature’s Micro-Nutrient Shield',
+      summary: 'Dried moringa leaves contain 17x the calcium of milk.',
+      text: 'Moringa oleifera grows across every West African ecosystem. Its dried leaf powder is dense with bioavailable calcium, zinc, iron, and quercetin. Stir half a teaspoon into your soup or water once daily to strengthen bone density and cellular repair.',
+    },
+    fr: {
+      title: 'Feuilles de Moringa — bouclier micronutritionnel',
+      summary: 'La poudre de moringa apporte 17 fois plus de calcium que le lait.',
+      text: 'Le moringa est un arbre miracle d’Afrique de l’Ouest. Sa poudre séchée apporte du fer, du calcium et des antioxydants puissants pour revitaliser l’organisme au quotidien.',
+    },
+  },
+  {
+    id: 22,
+    category: 'diet',
+    image: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=600&h=400&fit=crop',
+    en: {
+      title: 'Dawadawa / Iru — The Probiotic Seasoning',
+      summary: 'Fermented locust beans deliver deep umami along with gut probiotics.',
+      text: 'Traditional fermentation of African locust beans produces Bacillus subtilis and lactic acid strains. Replacing industrial bouillon cubes with authentic Iru or Dawadawa slashes sodium while enriching your meal with microbiome-friendly enzymes.',
+    },
+    fr: {
+      title: 'Soumbala / Dawadawa — le condiment probiotique',
+      summary: 'Les graines de néré fermentées enrichissent le microbiote.',
+      text: 'Le soumbala (dawadawa) traditionnel est issu de la fermentation des graines de néré. Il remplace avantageusement les cubes de bouillon industriels tout en apportant des enzymes digestives.',
+    },
+  },
+  {
+    id: 23,
+    category: 'diet',
+    image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600&h=400&fit=crop',
+    en: {
+      title: 'Sorghum & Millet — Fuel Without Insulin Spikes',
+      summary: 'Ancient cereal grains that deliver calm, sustained morning energy.',
+      text: 'Millet and sorghum starches take up to 3 times longer to break down than refined flour. Starting your morning with kunu, bouillie de mil, or millet porridge keeps hunger hormones quiet until lunchtime.',
+    },
+    fr: {
+      title: 'Sorgho et Mil — énergie stable sans pic d’insuline',
+      summary: 'Céréales rustiques pour une matinée rassasiée et tonique.',
+      text: 'Les glucides du mil et du sorgho se dégradent lentement. Une bouillie de mil matinale régule les hormones de la faim et maintient votre concentration jusqu’à midi.',
+    },
+  },
+  {
+    id: 24,
+    category: 'diet',
+    image: 'https://images.unsplash.com/photo-1546470427-e26264be0b0d?w=600&h=400&fit=crop',
+    en: {
+      title: 'Red Palm Oil — Carotenoids in Moderation',
+      summary: 'Virgin red palm oil contains tocotrienols that protect skin and eyes.',
+      text: 'Unrefined virgin red palm oil gets its deep crimson hue from beta-carotene and lycopene. You do not need cups of it; just 1–2 teaspoons in your vegetable potage supplies your daily Vitamin A without overloading saturated calories.',
+    },
+    fr: {
+      title: 'Huile de Palme Rouge — la juste mesure',
+      summary: '1 à 2 cuillères suffisent pour faire le plein de caroténoïdes protecteurs.',
+      text: 'L’huile de palme rouge brute non raffinée est l’une des plus riches sources naturelles de bêta-carotène. En petite quantité (1 à 2 cuillères à café), elle protège les yeux et la peau.',
+    },
+  },
+  {
+    id: 25,
+    category: 'diet',
+    image: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=600&h=400&fit=crop',
+    en: {
+      title: 'Agbalumo / Udara — The Weight Loss Friendly Sweet',
+      summary: 'Tangy local star apple satisfies sweet cravings with almost zero calories.',
+      text: 'A medium African star apple (Agbalumo) has fewer than 35 calories but provides a massive burst of tart flavor and ascorbic acid. Eaten after lunch, it curbs the desire for sugary pastries or sodas.',
+    },
+    fr: {
+      title: 'Pomme Étoile (Agbalumo / Udara) — douceur légère',
+      summary: 'Moins de 35 calories pour combler une envie de sucre naturellement.',
+      text: 'Le fruit de l’arbre à pomme étoile apporte une saveur acidulée intense avec très peu de calories. C’est l’alternative locale parfaite aux sodas et gâteaux après le repas.',
+    },
+  },
+  {
+    id: 26,
+    category: 'hydration',
+    image: 'https://images.unsplash.com/photo-1555529771-7888783a18d3?w=600&h=400&fit=crop',
+    en: {
+      title: 'Kunun Aya — Plant Milk Packed with Minerals',
+      summary: 'Pure tigernut milk blended with ginger and cloves is dairy-free gold.',
+      text: 'Homemade Kunun Aya is free of lactose, cholesterol, and artificial thickeners. The natural blend of tigernuts, dates, ginger, and cloves warms the digestion and provides potassium, calcium, and phosphorus in perfect liquid balance.',
+    },
+    fr: {
+      title: 'Kunun Aya — le lait végétal aux épices',
+      summary: 'Le lait de souchet maison avec gingembre et dattes sans lactose.',
+      text: 'Le Kunun Aya maison ne contient ni lactose ni conservateurs. Les épices douces (gingembre, clou de girofle) activent le métabolisme tout en hydratant le corps.',
+    },
+  },
+  {
+    id: 27,
+    category: 'diet',
+    image: 'https://images.unsplash.com/photo-1536411396859-3b8dba6e8022?w=600&h=400&fit=crop',
+    en: {
+      title: 'Garden Eggs & Groundnut Paste — The Smart Snack',
+      summary: 'Crisp, bitter-sweet African eggplants prevent mindless afternoon snacking.',
+      text: 'African garden eggs (Solanum aethiopicum) are 92% water and loaded with nasunin, a powerful antioxidant that protects brain cell membranes. Dipping crunchy garden eggs into roasted groundnut paste gives an unbeatable balance of crunch, healthy fat, and satiety.',
+    },
+    fr: {
+      title: 'Aubergines locales & pâte d’arachide — l’encas malin',
+      summary: '92% d’eau et un antioxydant puissant qui protège vos cellules.',
+      text: 'Les petites aubergines locales africaines sont gorgées d’eau et de fibres. Trempées dans une pointe de pâte d’arachide, elles forment un coupe-faim sain et croquant pour l’après-midi.',
+    },
+  },
+  {
+    id: 28,
+    category: 'hydration',
+    image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&h=400&fit=crop',
+    en: {
+      title: 'Late Night Swallows & Sleep Disruption',
+      summary: 'Why eating heavy pounded yam within 2 hours of bedtime harms rest.',
+      text: 'Digestive tract activity requires high blood flow and raises internal core temperature — directly conflicting with the natural temperature drop required for deep restorative sleep. Finish dense swallow meals by 7:30 PM, or choose a lighter option if dining late.',
+    },
+    fr: {
+      title: 'Dîners tardifs et sommeil réparateur',
+      summary: 'Pourquoi manger lourd tard le soir nuit à la récupération.',
+      text: 'La digestion lourde augmente la température corporelle et bloque les cycles de sommeil profond. Terminez vos repas copieux avant 19h30 pour permettre à votre corps de brûler les graisses durant la nuit.',
+    },
+  },
 ]
 
 // ─── Daily rotation helper ─────────────────────────────────────────────────────
-// Deterministic shuffle seeded by today's date — same 10 articles all day, new set tomorrow
-function getDailyTips() {
-  const today = new Date().toISOString().slice(0, 10) // 'YYYY-MM-DD'
-  let seed = today.split('-').reduce((acc, n) => acc + parseInt(n), 0)
-
-  const seededRandom = () => {
-    seed = (seed * 9301 + 49297) % 233280
-    return seed / 233280
+// Rotates through distinct sets based on the local calendar day
+export function getDailyTips() {
+  const now = new Date()
+  const dayIndex = now.getDay() // 0 to 6 (Sun to Sat)
+  const dateNum = now.getDate()
+  
+  // Deterministic daily offset: changes every single day so each day feels fresh
+  const poolSize = ALL_TIPS.length
+  const offset = (dayIndex * 4 + dateNum) % poolSize
+  const daily = []
+  for (let i = 0; i < 10; i++) {
+    daily.push(ALL_TIPS[(offset + i) % poolSize])
   }
-
-  const shuffled = [...ALL_TIPS].sort(() => seededRandom() - 0.5)
-  return shuffled.slice(0, 10) // always 10 per day
+  return daily
 }
 
 // ─── Component ─────────────────────────────────────────────────────────────────
@@ -262,7 +474,12 @@ export default function WellnessTips() {
     const fetchTips = async () => {
       setSyncing(true)
       try {
-        const res = await axios.get('/api/wellness/tips', { withCredentials: true })
+        const now = new Date()
+        const y = now.getFullYear()
+        const m = String(now.getMonth() + 1).padStart(2, '0')
+        const d = String(now.getDate()).padStart(2, '0')
+        const dateStr = `${y}-${m}-${d}`
+        const res = await axios.get(`/api/wellness/tips?date=${dateStr}`, { withCredentials: true })
         if (res.data.success && res.data.data?.length > 0) {
           // Map Groq-generated articles into the card shape
           const mapped = res.data.data.map((a, i) => ({

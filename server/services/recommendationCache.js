@@ -14,12 +14,13 @@ if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
   }
 }
 
-function cacheKey(userId) {
-  return `recs:${userId}:${new Date().toISOString().slice(0, 10)}`
+function cacheKey(userId, dateStr) {
+  const d = dateStr || new Date().toISOString().slice(0, 10)
+  return `recs:${userId}:${d}`
 }
 
-export async function getCachedRecommendations(userId) {
-  const key = cacheKey(userId)
+export async function getCachedRecommendations(userId, dateStr) {
+  const key = cacheKey(userId, dateStr)
   if (redis) {
     try {
       const data = await redis.get(key)
@@ -31,8 +32,8 @@ export async function getCachedRecommendations(userId) {
   return localCache.get(key) || null
 }
 
-export async function setCachedRecommendations(userId, data) {
-  const key = cacheKey(userId)
+export async function setCachedRecommendations(userId, data, dateStr) {
+  const key = cacheKey(userId, dateStr)
   if (redis) {
     try {
       // Cache for 24 hours
@@ -43,4 +44,24 @@ export async function setCachedRecommendations(userId, data) {
     }
   }
   localCache.set(key, data)
+}
+
+export async function clearUserRecommendationCache(userId) {
+  // Clear memory cache keys for this user
+  for (const k of Array.from(localCache.keys())) {
+    if (k.startsWith(`recs:${userId}:`)) {
+      localCache.delete(k)
+    }
+  }
+  if (redis) {
+    try {
+      const pattern = `recs:${userId}:*`
+      const keys = await redis.keys(pattern)
+      if (keys && keys.length > 0) {
+        await Promise.all(keys.map(k => redis.del(k)))
+      }
+    } catch (err) {
+      console.warn('Failed to clear redis cache for user:', err.message)
+    }
+  }
 }

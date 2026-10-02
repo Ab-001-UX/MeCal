@@ -12,6 +12,7 @@ import {
   sanitizeUser,
   serializeAllergies
 } from '../utils/userHelpers.js'
+import { clearUserRecommendationCache } from '../services/recommendationCache.js'
 
 
 export async function onboardUser(req, res) {
@@ -292,7 +293,7 @@ export async function updateProfile(req, res) {
   try {
     const allowedFields = [
       'name', 'age', 'height', 'weight', 'targetWeight', 'unitPreference', 'gender', 'goal',
-      'targetDuration', 'country', 'tribe', 'lifestyleType', 'budgetPreference',
+      'targetDuration', 'customTargetDuration', 'country', 'tribe', 'lifestyleType', 'budgetPreference',
       'foodAvailability', 'activityLevel', 'waterPreference', 'otherAllergies',
       'calorieGoal', 'waterGoal', 'stepGoal'
     ]
@@ -306,6 +307,12 @@ export async function updateProfile(req, res) {
 
     if (req.body.allergies !== undefined) {
       data.allergies = serializeAllergies(req.body.allergies)
+    }
+
+    if (req.body.resetPlan === true) {
+      // Starting a new goal / plan resets the plan start date to now (Day 1)
+      data.createdAt = new Date()
+      await clearUserRecommendationCache(req.user.id)
     }
 
     if (data.age !== undefined) data.age = data.age ? parseInt(data.age, 10) : null

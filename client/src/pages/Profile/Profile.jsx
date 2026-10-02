@@ -9,6 +9,19 @@ import { updateProfile } from '../../services/auth.service.js'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft } from 'lucide-react'
 import ProfileSkeleton from './ProfileSkeleton'
+import { calculateTotalProgramDays } from '../Home/Home.jsx'
+import NewPlanWizard from './NewPlanWizard.jsx'
+
+const getProgramDay = (createdAtStr) => {
+  if (!createdAtStr) return 1
+  const createdDate = new Date(createdAtStr)
+  const createdMidnight = new Date(createdDate.getFullYear(), createdDate.getMonth(), createdDate.getDate())
+  const today = new Date()
+  const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+  const diffTime = todayMidnight.getTime() - createdMidnight.getTime()
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+  return Math.max(1, diffDays + 1)
+}
 
 export default function Profile() {
   const { user: storeUser, setUser } = useUserStore()
@@ -19,6 +32,7 @@ export default function Profile() {
   const [loading, setLoading] = useState(!storeUser)
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [showNewPlanWizard, setShowNewPlanWizard] = useState(false)
   const [form, setForm] = useState({})
   const navigate = useNavigate()
 
@@ -129,7 +143,17 @@ export default function Profile() {
     }
   }
 
+  const handlePlanActivated = (updatedUser) => {
+    setLocalUser(updatedUser)
+    setUser(updatedUser)
+    setShowNewPlanWizard(false)
+    navigate('/home', { state: { showWelcomeModal: true, newPlanStarted: true } })
+  }
+
   const displayUser = user || storeUser
+  const totalDays = calculateTotalProgramDays(displayUser?.targetDuration, displayUser?.customTargetDuration)
+  const currentDay = getProgramDay(displayUser?.createdAt)
+  const isPlanCompleted = currentDay >= totalDays
 
   if (loading) return <ProfileSkeleton />
   if (!displayUser) return <div className={styles.error}>{currentCulture === 'fr' ? 'Impossible de charger le profil.' : 'Failed to load profile.'}</div>
@@ -543,6 +567,59 @@ export default function Profile() {
         </div>
       </div>
 
+      {/* Plan Status & Start New Plan Card */}
+      <div 
+        className={styles.section} 
+        style={{ 
+          background: isPlanCompleted ? 'linear-gradient(135deg, rgba(234, 179, 8, 0.12), rgba(34, 197, 94, 0.12))' : 'var(--color-bg-base)', 
+          border: isPlanCompleted ? '1.5px solid rgba(234, 179, 8, 0.45)' : '1px solid var(--color-border)', 
+          borderRadius: '16px', 
+          padding: '16px',
+          boxShadow: isPlanCompleted ? '0 4px 16px rgba(234, 179, 8, 0.15)' : 'none'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontSize: '24px' }}>{isPlanCompleted ? '🏆' : '🎯'}</span>
+          <div>
+            <h4 style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: 'var(--color-text-primary)' }}>
+              {isPlanCompleted 
+                ? (currentCulture === 'fr' ? 'Programme terminé avec succès ! 🎉' : 'Plan Completed! Congratulations! 🎉') 
+                : (currentCulture === 'fr' ? `Progression du plan : Jour ${currentDay} sur ${totalDays}` : `Plan Timeline: Day ${currentDay} of ${totalDays}`)}
+            </h4>
+            <p style={{ margin: '2px 0 0 0', fontSize: '12.5px', color: 'var(--color-text-secondary)', lineHeight: 1.4 }}>
+              {isPlanCompleted 
+                ? (currentCulture === 'fr' ? `Vous avez atteint votre objectif de ${totalDays} jours ! Prêt pour une nouvelle étape ?` : `You reached your ${totalDays}-day milestone! Ready to choose a new target?`) 
+                : (currentCulture === 'fr' ? `Objectif actif : ${displayUser.goal === 'lose' ? 'Perte de poids' : displayUser.goal === 'gain' ? 'Prise de masse' : 'Maintien'}` : `Active goal: ${displayUser.goal === 'lose' ? 'Weight Loss' : displayUser.goal === 'gain' ? 'Weight Gain' : 'Maintenance'}`)}
+            </p>
+          </div>
+        </div>
+
+        <button 
+          type="button" 
+          onClick={() => setShowNewPlanWizard(true)}
+          style={{
+            width: '100%',
+            marginTop: '12px',
+            padding: '12px 16px',
+            borderRadius: '12px',
+            border: 'none',
+            background: 'var(--color-primary)',
+            color: '#ffffff',
+            fontWeight: '700',
+            fontSize: '14px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            boxShadow: '0 4px 12px rgba(46, 125, 50, 0.2)'
+          }}
+        >
+          <span>🚀</span>
+          <span>{currentCulture === 'fr' ? 'Commencer un nouveau plan' : 'Start a New Plan'}</span>
+        </button>
+      </div>
+
       <div className={styles.section}>
         <h3 className={styles.sectionTitle}>{currentCulture === 'fr' ? 'Objectifs quotidiens' : 'Daily targets'}</h3>
         <div className={styles.detailsList}>
@@ -613,9 +690,40 @@ export default function Profile() {
       </div>
 
       <div className={styles.actions}>
+        <button 
+          type="button" 
+          onClick={() => setShowNewPlanWizard(true)}
+          style={{
+            width: '100%',
+            padding: '13px',
+            borderRadius: '12px',
+            border: '1.5px solid var(--color-primary)',
+            background: 'var(--color-primary-soft, rgba(46, 125, 50, 0.1))',
+            color: 'var(--color-primary)',
+            fontWeight: '700',
+            fontSize: '14.5px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px'
+          }}
+        >
+          <span>🚀</span>
+          <span>{currentCulture === 'fr' ? 'Changer d’objectif / Nouveau plan' : 'Change Goal / Start New Plan'}</span>
+        </button>
         <button type="button" className={styles.buttonPrimary} onClick={openEdit}>{currentCulture === 'fr' ? 'Modifier le profil' : 'Edit Profile'}</button>
         <button type="button" className={styles.buttonDanger} onClick={handleLogout}>{currentCulture === 'fr' ? 'Se déconnecter' : 'Log Out'}</button>
       </div>
+
+      {/* New Plan Wizard Modal */}
+      <NewPlanWizard
+        isOpen={showNewPlanWizard}
+        onClose={() => setShowNewPlanWizard(false)}
+        user={displayUser}
+        currentCulture={currentCulture}
+        onPlanActivated={handlePlanActivated}
+      />
     </div>
   )
 }

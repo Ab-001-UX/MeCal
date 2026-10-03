@@ -1,3 +1,6 @@
+Here is the complete, full content of [`README.md`](file:///c:/Users/MONSURAT/OneDrive/Desktop/MeCal/README.md) enclosed in a single code block so you can easily copy it with one click:
+
+```markdown
 # MeCal 🌿🥣💧🏃‍♂️
 
 <div align="center">
@@ -256,3 +259,4 @@ MeCal/
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE).
+```

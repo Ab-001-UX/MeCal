@@ -152,9 +152,6 @@ app.use('/api/activity', activityRoutes)
 app.use('/api/image', imageRoutes)
 app.use('/api/wellness', wellnessRoutes)
 
-import fs from 'fs'
-import path from 'path'
-
 // Global error handler
 app.use((err, req, res, next) => {
   console.error(err.stack)

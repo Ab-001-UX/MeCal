@@ -1,26 +1,9 @@
-import { executeMealPipeline } from '../services/mealPipeline.js'
 import { analyzeFoodText, getDailyMealPlan } from '../services/gemini.service.js'
-import { lookupBarcode } from '../services/openfoodfacts.service.js'
 import { getCachedRecommendations, setCachedRecommendations } from '../services/recommendationCache.js'
 import { profileForAi } from '../utils/userHelpers.js'
 import { getStartOfDay, getEndOfDay } from '../utils/dateHelpers.js'
-import { deleteImage } from '../services/cloudinary.service.js'
 import { fetchFoodImageUrl } from '../services/foodImage.service.js'
 import prisma from '../services/prisma.js'
-
-export async function scanMeal(req, res) {
-  try {
-    const { image, type } = req.body
-    
-    const result = await executeMealPipeline({ image, userId: req.user.id, type })
-    
-    res.status(200).json(result)
-  } catch (error) {
-    console.error('Scan meal error:', error)
-    const status = error.message.startsWith('Validation') ? 400 : 500
-    res.status(status).json({ success: false, message: error.message })
-  }
-}
 
 export async function getTodayMeals(req, res) {
   try {
@@ -37,35 +20,6 @@ export async function getTodayMeals(req, res) {
         }
       }
     })
-
-    // Clean up expired Cloudinary images for this user (background task)
-    const todayStart = getStartOfDay(req, Date.now())
-    const expiredMeals = await prisma.meal.findMany({
-      where: {
-        userId: req.user.id,
-        createdAt: {
-          lt: todayStart
-        },
-        imageUrl: {
-          contains: 'cloudinary'
-        }
-      }
-    })
-
-    if (expiredMeals.length > 0) {
-      (async () => {
-        for (const m of expiredMeals) {
-          if (m.imageUrl) {
-            console.log(`[Cloudinary Cleanup] Deleting expired image for meal ${m.id} (${m.name})`)
-            await deleteImage(m.imageUrl)
-            await prisma.meal.update({
-              where: { id: m.id },
-              data: { imageUrl: null }
-            })
-          }
-        }
-      })().catch(err => console.error('[Cloudinary Cleanup] Background cleanup error:', err))
-    }
     
     res.status(200).json({ success: true, data: meals })
   } catch (error) {
@@ -297,44 +251,6 @@ export async function getRecommendations(req, res) {
   } catch (error) {
     console.error('Recommendations error:', error)
     res.status(500).json({ success: false, message: 'Failed to fetch recommendations' })
-  }
-}
-
-export async function scanBarcode(req, res) {
-  try {
-    const { barcode, type } = req.body
-    if (!barcode) {
-      return res.status(400).json({ success: false, message: 'Barcode is required' })
-    }
-
-    const product = await lookupBarcode(barcode)
-
-    const savedMeal = await prisma.meal.create({
-      data: {
-        name: product.brand ? `${product.foodName} (${product.brand})` : product.foodName,
-        calories: product.calories,
-        protein: product.protein,
-        carbs: product.carbs,
-        fat: product.fat,
-        imageUrl: product.imageUrl,
-        type: type || null,
-        userId: req.user.id
-      }
-    })
-
-    res.status(200).json({
-      success: true,
-      data: savedMeal,
-      product,
-      servingNote: `Per ${product.servingSize}`
-    })
-  } catch (error) {
-    console.error('Barcode scan error:', error)
-    let message = error.message || 'Barcode lookup failed'
-    if (message.includes('not found') || message.includes('failed') || message.includes('Open Food Facts')) {
-      message = 'Product not found. Local West African snacks are often missing from global barcode databases. Please snap a photo of the product package or item to log it with AI instead!'
-    }
-    res.status(400).json({ success: false, message })
   }
 }
 

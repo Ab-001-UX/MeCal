@@ -1,1 +1,5 @@
-AbortError: This operation was aborted
+Error: AI services failed: Gemini error (Gemini API Error: Not Found) | Groq error (Groq API error 404: {"error":{"message":"The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.","type":"invalid_request_error","code":"model_not_found"}}
+)
+    at callGemini (file:///C:/Users/MONSURAT/OneDrive/Desktop/MeCal/server/services/gemini.service.js:60:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async getDailyMealPlan (file:///C:/Users/MONSURAT/OneDrive/Desktop/MeCal/server/services/gemini.service.js:306:18)

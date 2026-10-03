@@ -23,7 +23,7 @@ export function Layout({ children }) {
             <Home size={20} />
             <span className={styles.navLabel}>{t('nav.home')}</span>
           </NavLink>
-          <NavLink to="/scan" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>
+          <NavLink to="/log-meal" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}>
             <Utensils size={20} />
             <span className={styles.navLabel}>{t('nav.logMeal')}</span>
           </NavLink>

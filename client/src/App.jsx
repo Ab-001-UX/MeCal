@@ -99,11 +99,12 @@ export default function App() {
           </AuthGate>
         } />
 
-        <Route path="/scan" element={
+        <Route path="/log-meal" element={
           <AuthGate>
             <Layout><Scan /></Layout>
           </AuthGate>
         } />
+        <Route path="/scan" element={<Navigate to="/log-meal" replace />} />
         
         <Route path="/analytics" element={
           <AuthGate>

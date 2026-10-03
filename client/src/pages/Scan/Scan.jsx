@@ -137,7 +137,7 @@ export default function Scan() {
 
   const [activeTab, setActiveTab] = useState('manual')
   const [showResults, setShowResults] = useState(false)
-  const [scanResult, setScanResult] = useState(null)
+  const [mealResult, setMealResult] = useState(null)
   const [quantity, setQuantity] = useState(1)
   const [isFavorite, setIsFavorite] = useState(false)
   const [savedMeals, setSavedMeals] = useState([])
@@ -147,7 +147,7 @@ export default function Scan() {
   const [localLoading, setLocalLoading] = useState(false)
   const [loadingActionText, setLoadingActionText] = useState('')
 
-  // Inline edit states for fixing scan results
+  // Inline edit states for fixing meal calculation results
   const [isEditingResults, setIsEditingResults] = useState(false)
   const [editedFoodName, setEditedFoodName] = useState('')
   const [editedCalories, setEditedCalories] = useState(0)
@@ -170,14 +170,14 @@ export default function Scan() {
   const [resultMealType, setResultMealType] = useState('breakfast')
 
   useEffect(() => {
-    if (scanResult) {
-      setEditedFoodName(scanResult.foodName || '')
-      setEditedCalories(scanResult.calories || 0)
-      setEditedCarbs(scanResult.carbs || 0)
-      setEditedProtein(scanResult.protein || 0)
-      setEditedFat(scanResult.fat || 0)
+    if (mealResult) {
+      setEditedFoodName(mealResult.foodName || '')
+      setEditedCalories(mealResult.calories || 0)
+      setEditedCarbs(mealResult.carbs || 0)
+      setEditedProtein(mealResult.protein || 0)
+      setEditedFat(mealResult.fat || 0)
     }
-  }, [scanResult])
+  }, [mealResult])
 
   useEffect(() => {
     const culture = currentCulture === 'fr' ? 'fr' : 'en'
@@ -196,12 +196,12 @@ export default function Scan() {
   }, [])
 
   useEffect(() => {
-    if (!scanResult?.foodName) return
+    if (!mealResult?.foodName) return
     const match = savedMeals.some(
-      (m) => m.name?.toLowerCase() === scanResult.foodName?.toLowerCase()
+      (m) => m.name?.toLowerCase() === mealResult.foodName?.toLowerCase()
     )
     setIsFavorite(match)
-  }, [scanResult?.foodName, savedMeals])
+  }, [mealResult?.foodName, savedMeals])
 
   useEffect(() => {
     if (showResults) {
@@ -217,11 +217,11 @@ export default function Scan() {
   }, [activeTab])
 
   const handleFavorite = async () => {
-    if (!scanResult?.foodName) return
+    if (!mealResult?.foodName) return
     try {
       if (isFavorite) {
         const existing = savedMeals.find(
-          (m) => m.name?.toLowerCase() === scanResult.foodName?.toLowerCase()
+          (m) => m.name?.toLowerCase() === mealResult.foodName?.toLowerCase()
         )
         if (existing) await removeSavedMeal(existing.id)
         setSavedMeals((prev) => prev.filter((m) => m.id !== existing?.id))
@@ -229,12 +229,12 @@ export default function Scan() {
         setToastMessage(currentCulture === 'fr' ? 'Plat retiré des favoris' : 'Meal removed from saved foods')
       } else {
         const res = await saveMealToLibrary({
-          name: scanResult.foodName,
-          calories: scanResult.calories,
-          protein: scanResult.protein,
-          carbs: scanResult.carbs,
-          fat: scanResult.fat,
-          imageUrl: scanResult.imageUrl
+          name: mealResult.foodName,
+          calories: mealResult.calories,
+          protein: mealResult.protein,
+          carbs: mealResult.carbs,
+          fat: mealResult.fat,
+          imageUrl: mealResult.imageUrl
         })
         if (res.data.success) {
           setSavedMeals((prev) => [...prev, res.data.data])
@@ -304,7 +304,7 @@ export default function Scan() {
 
       if (response.data.success) {
         const meal = response.data.data
-        setScanResult({
+        setMealResult({
           id: meal.id,
           foodName: meal.name,
           description: response.data.fallbackUsed ? 'Analyzed using regional nutritional values.' : 'Calculated via AI Nutrition Database.',
@@ -365,7 +365,7 @@ export default function Scan() {
     setError('')
 
     try {
-      const response = await axios.put(`/api/meal/${scanResult.id}`, {
+      const response = await axios.put(`/api/meal/${mealResult.id}`, {
         name: editedFoodName,
         calories: parseFloat(editedCalories) || 0,
         protein: parseFloat(editedProtein) || 0,
@@ -400,7 +400,7 @@ export default function Scan() {
   }
 
   const handleSave = async () => {
-    if (!scanResult?.id) {
+    if (!mealResult?.id) {
       navigate('/home')
       return
     }
@@ -411,12 +411,12 @@ export default function Scan() {
 
     try {
       const scale = parseFloat(quantity) || 1
-      await axios.put(`/api/meal/${scanResult.id}`, {
-        name: scanResult.foodName,
-        calories: (scanResult.calories || 0) * scale,
-        protein: (scanResult.protein || 0) * scale,
-        carbs: (scanResult.carbs || 0) * scale,
-        fat: (scanResult.fat || 0) * scale,
+      await axios.put(`/api/meal/${mealResult.id}`, {
+        name: mealResult.foodName,
+        calories: (mealResult.calories || 0) * scale,
+        protein: (mealResult.protein || 0) * scale,
+        carbs: (mealResult.carbs || 0) * scale,
+        fat: (mealResult.fat || 0) * scale,
         type: resultMealType
       }, {
         withCredentials: true
@@ -797,14 +797,14 @@ export default function Scan() {
                 value={editedFoodName} 
                 onChange={(e) => {
                   setEditedFoodName(e.target.value)
-                  if (scanResult) scanResult.foodName = e.target.value
+                  if (mealResult) mealResult.foodName = e.target.value
                 }} 
                 className={styles.editFoodNameInput} 
                 style={{ flex: 1, border: 'none', borderBottom: '1px solid #ddd', padding: '6px 0', fontSize: '18px', fontWeight: 'bold', background: 'transparent', outline: 'none' }}
                 placeholder={currentCulture === 'fr' ? "Nom du repas..." : "Name this meal..."}
               />
             </div>
-            <p className={styles.foodDescription} style={{ padding: '0 10px', margin: '4px 0' }}>{scanResult?.description}</p>
+            <p className={styles.foodDescription} style={{ padding: '0 10px', margin: '4px 0' }}>{mealResult?.description}</p>
           </div>
 
           {/* Slot selector */}
@@ -891,7 +891,7 @@ export default function Scan() {
                     />
                   </svg>
                   <div className={styles.macroCircleText}>
-                    <span>{scanResult ? scanResult.calories * quantity : 0}</span>
+                    <span>{mealResult ? mealResult.calories * quantity : 0}</span>
                   </div>
                 </div>
                 <span className={styles.macroLabel}>{i18n[currentCulture].calories}</span>
@@ -911,7 +911,7 @@ export default function Scan() {
                     />
                   </svg>
                   <div className={styles.macroCircleText}>
-                    <span>{scanResult ? scanResult.carbs * quantity : 0}g</span>
+                    <span>{mealResult ? mealResult.carbs * quantity : 0}g</span>
                   </div>
                 </div>
                 <span className={styles.macroLabel}>{i18n[currentCulture].fats}</span>
@@ -931,7 +931,7 @@ export default function Scan() {
                     />
                   </svg>
                   <div className={styles.macroCircleText}>
-                    <span>{scanResult ? scanResult.protein * quantity : 0}g</span>
+                    <span>{mealResult ? mealResult.protein * quantity : 0}g</span>
                   </div>
                 </div>
                 <span className={styles.macroLabel}>{i18n[currentCulture].protein}</span>
@@ -951,7 +951,7 @@ export default function Scan() {
                     />
                   </svg>
                   <div className={styles.macroCircleText}>
-                    <span>{scanResult ? scanResult.fat * quantity : 0}g</span>
+                    <span>{mealResult ? mealResult.fat * quantity : 0}g</span>
                   </div>
                 </div>
                 <span className={styles.macroLabel}>{i18n[currentCulture].fats}</span>

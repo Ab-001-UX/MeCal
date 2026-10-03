@@ -9,7 +9,7 @@ async function callGemini(prompt, retries = 2) {
     return await callGroq(prompt);
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
   const payload = { contents: [{ parts: [{ text: prompt }] }] };
 
   let lastError = null;
@@ -83,47 +83,6 @@ async function callGroq(prompt) {
   if (!response.ok) {
     const err = await response.text();
     throw new Error(`Groq API error ${response.status}: ${err}`);
-  }
-
-  const data = await response.json();
-  return data.choices?.[0]?.message?.content || '';
-}
-
-async function callGroqVision(prompt, base64Data) {
-  let groqKey = process.env.GROQ_API_KEY;
-  if (groqKey) groqKey = groqKey.replace(/['"]/g, '').trim();
-  if (!groqKey) throw new Error('GROQ_API_KEY is not set');
-
-  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${groqKey}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      model: 'llama-3.2-11b-vision-preview',
-      messages: [
-        {
-          role: 'user',
-          content: [
-            { type: 'text', text: prompt },
-            {
-              type: 'image_url',
-              image_url: {
-                url: `data:image/jpeg;base64,${base64Data}`
-              }
-            }
-          ]
-        }
-      ],
-      temperature: 0.2,
-      response_format: { type: "json_object" }
-    })
-  });
-
-  if (!response.ok) {
-    const err = await response.text();
-    throw new Error(`Groq Vision API error ${response.status}: ${err}`);
   }
 
   const data = await response.json();
@@ -366,8 +325,31 @@ export async function getDailyMealPlan(profile, lang = 'en', dateStr = null, day
     const isHausa = (profile.tribe || '').toLowerCase() === 'hausa' || (profile.tribe || '').toLowerCase().includes('hausa');
     const isFrancophone = lang === 'fr';
 
+    const FRUIT_POOLS = {
+      en: [
+        { name: "Watermelon", quantity: "2 thick wedges", bestTime: "Mid-morning (11:00 AM)", idea: "Hydrating and low-calorie snack.", emoji: "🍉" },
+        { name: "Pawpaw (Papaya)", quantity: "1 medium bowl", bestTime: "Before breakfast", idea: "Aids digestion with natural enzymes.", emoji: "🍈" },
+        { name: "Garden Eggs & Cucumber", quantity: "2 garden eggs + 1/2 cucumber", bestTime: "Afternoon", idea: "Crunchy, high-fiber, low-calorie.", emoji: "🥒" },
+        { name: "Fresh Pineapple", quantity: "1 cup diced", bestTime: "Post-lunch", idea: "Sweet, refreshing, and supports digestion.", emoji: "🍍" },
+        { name: "Orange", quantity: "2 whole oranges", bestTime: "Early afternoon", idea: "Vitamin C boost for immune support.", emoji: "🍊" },
+        { name: "Mango", quantity: "1 medium mango", bestTime: "After lunch", idea: "Rich in antioxidants and natural sweetness.", emoji: "🥭" },
+        { name: "African Star Apple (Agbalumo)", quantity: "3 fruits", bestTime: "Late afternoon", idea: "Traditional tart and sweet low-calorie fruit.", emoji: "🍎" }
+      ],
+      fr: [
+        { name: "Pastèque", quantity: "2 belles tranches", bestTime: "Milieu de matinée (11h00)", idea: "En-cas très hydratant et faible en calories.", emoji: "🍉" },
+        { name: "Papaye", quantity: "1 bol moyen", bestTime: "Avant le petit-déjeuner", idea: "Favorise une excellente digestion.", emoji: "🍈" },
+        { name: "Concombre frais", quantity: "1 concombre moyen", bestTime: "Après-midi", idea: "Croquant, riche en eau et fibres.", emoji: "🥒" },
+        { name: "Ananas frais", quantity: "1 tasse en dés", bestTime: "Après le déjeuner", idea: "Rafraîchissant et riche en vitamine C.", emoji: "🍍" },
+        { name: "Oranges locales", quantity: "2 oranges", bestTime: "Début d'après-midi", idea: "Plein de vitalité et de vitamine C.", emoji: "🍊" },
+        { name: "Mangue mûre", quantity: "1 mangue moyenne", bestTime: "Après le déjeuner", idea: "Douceur naturelle et antioxydants.", emoji: "🥭" },
+        { name: "Corossol", quantity: "1 portion", bestTime: "Fin d'après-midi", idea: "Fruit local doux et apaisant.", emoji: "🍈" }
+      ]
+    };
+    const currentFruitPool = FRUIT_POOLS[isFrancophone ? 'fr' : 'en'] || FRUIT_POOLS.en;
     const goal = (profile.goal || 'maintain').toLowerCase();
-    const rotationIndex = (dayNum !== null && dayNum !== undefined) ? (dayNum - 1) : (isNaN(dayIndex) ? 0 : dayIndex);
+    const todayDateObj = dateStr ? new Date(dateStr) : new Date();
+    const safeDayIndex = isNaN(todayDateObj.getDay()) ? new Date().getDay() : todayDateObj.getDay();
+    const rotationIndex = (dayNum !== null && dayNum !== undefined) ? (dayNum - 1) : safeDayIndex;
     const selectedFruit = currentFruitPool[Math.abs(rotationIndex) % currentFruitPool.length];
 
     let fallbackPlan;
@@ -742,147 +724,6 @@ export async function getDailyMealPlan(profile, lang = 'en', dateStr = null, day
   }
 }
 
-export async function analyzeFoodImage(base64Image) {
-  let apiKey = process.env.GEMINI_API_KEY;
-  if (apiKey) apiKey = apiKey.replace(/['"]/g, '').trim();
-  if (!apiKey) {
-    throw new Error('GEMINI_API_KEY is not set in environment variables');
-  }
-
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-  // Extract base64 data (remove header if present)
-  const base64Data = base64Image.split(',')[1] || base64Image;
-
-  const prompt = `
-    Analyze this food image and return a JSON object with the following structure:
-    {
-      "foodName": "Name of the food",
-      "calories": 500,
-      "carbs": 50,
-      "protein": 20,
-      "fat": 10,
-      "confidence": "High",
-      "tribeTip": "A cultural health tip related to this food (e.g., 'Perfect for a Yoruba lunch!')"
-    }
-    confidence must be exactly one of: "High", "Medium", "Low".
-    Return ONLY the raw JSON object. Do not wrap it in markdown or code blocks. The values for calories, carbs, protein, and fat should be numbers, not strings.
-  `;
-
-  const payload = {
-    contents: [
-      {
-        parts: [
-          { text: prompt },
-          {
-            inlineData: {
-              mimeType: "image/jpeg",
-              data: base64Data
-            }
-          }
-        ]
-      }
-    ]
-  };
-
-  try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Gemini API Error:', errorData);
-      throw new Error(`Gemini API Error: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) throw new Error('Empty Gemini response');
-    
-    const result = parseJsonFromText(text);
-    
-    const validation = validateNutritionData(result);
-    
-    if (!validation.isValid) {
-      console.warn('Gemini data failed validation:', validation.errors);
-      const fallback = getFallbackData(result.foodName);
-      return {
-        foodName: fallback.foodName,
-        calories: fallback.calories,
-        macros: {
-          carbs: fallback.carbs,
-          protein: fallback.protein,
-          fat: fallback.fat
-        },
-        tribeTip: result.tribeTip || "Fallback applied due to invalid data.",
-        confidence: 'Low',
-        fallbackUsed: true
-      };
-    }
-    
-    return {
-      foodName: result.foodName,
-      calories: result.calories,
-      macros: {
-        carbs: result.carbs,
-        protein: result.protein,
-        fat: result.fat
-      },
-      tribeTip: result.tribeTip,
-      confidence: normalizeConfidence(result.confidence, false),
-      fallbackUsed: false
-    };
-  } catch (error) {
-    console.error('Gemini Image Scan Error:', error.message);
-    try {
-      console.log('[AI] Attempting Groq Vision fallback...');
-      const groqText = await callGroqVision(prompt, base64Data);
-      const jsonStr = groqText.replace(/```json|```/g, '').trim();
-      const result = JSON.parse(jsonStr);
-      const validation = validateNutritionData(result);
-      
-      if (validation.isValid) {
-        return {
-          foodName: result.foodName,
-          calories: result.calories,
-          macros: {
-            carbs: result.carbs,
-            protein: result.protein,
-            fat: result.fat
-          },
-          tribeTip: result.tribeTip,
-          confidence: 'Medium',
-          fallbackUsed: false,
-          source: 'groq_vision'
-        };
-      }
-      console.warn('[AI] Groq Vision data failed validation:', validation.errors);
-    } catch (groqError) {
-      console.error('[AI] Groq Vision fallback also failed:', groqError.message);
-    }
-
-    // Ultimate fallback to hardcoded data if both vision models fail
-    const fallback = getFallbackData();
-    return {
-      foodName: fallback.foodName,
-      calories: fallback.calories,
-      macros: {
-        carbs: fallback.carbs,
-        protein: fallback.protein,
-        fat: fallback.fat
-      },
-      tribeTip: "Fallback applied due to service error.",
-      confidence: 'Low',
-      fallbackUsed: true
-    };
-  }
-}
-
 function normalizeConfidence(value, fallbackUsed) {
   if (fallbackUsed) return 'Low'
   return ['High', 'Medium', 'Low'].includes(value) ? value : 'Medium'
@@ -895,7 +736,7 @@ export async function getMealRecommendations(userProfile, logs = []) {
     throw new Error('GEMINI_API_KEY is not set in environment variables');
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
   const prompt = `
     Generate personalized meal recommendations for a user with the following profile:
@@ -970,7 +811,7 @@ export async function analyzeFoodText(textQuery) {
     throw new Error('GEMINI_API_KEY is not set in environment variables');
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
   const prompt = `
     Analyze this text description of a meal and return a JSON object.

@@ -5,7 +5,7 @@ import styles from './Home.module.css'
 import HomeSkeleton from './HomeSkeleton.jsx'
 import axios from 'axios'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Dumbbell, Droplet, Wheat, Flame, Footprints, ChevronRight, ChevronDown, Calendar, Zap, ThumbsUp, Leaf, Trash2, Pencil, MoreVertical, Camera, Utensils, CheckCircle2, Lightbulb, Sparkles, Sun, Moon } from 'lucide-react'
+import { Dumbbell, Droplet, Wheat, Flame, Footprints, ChevronRight, ChevronDown, Calendar, Zap, ThumbsUp, Leaf, Trash2, Pencil, MoreVertical, Utensils, CheckCircle2, Lightbulb, Sparkles, Sun, Moon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { getRecommendations } from '../../services/meal.service.js'
 import { logStepGoalReport } from '../../services/activity.service.js'
@@ -1692,8 +1692,8 @@ export default function Home() {
               <p>{t('noMealsLoggedText')}</p>
               {!isPastDay && (
                 <div className={styles.emptyStateActionRow}>
-                  <button className={styles.emptyStateBtn} onClick={() => navigate('/scan')}>
-                    <Utensils size={14} /> {t('scanWithCamera')}
+                  <button className={styles.emptyStateBtn} onClick={() => navigate('/log-meal')}>
+                    <Utensils size={14} /> {t('nav.logMeal')}
                   </button>
                 </div>
               )}

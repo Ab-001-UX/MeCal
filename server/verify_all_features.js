@@ -31,39 +31,6 @@ async function runVerification() {
   console.log('[PASS] Manual Entry Meal Created successfully with ID:', manualMeal.id);
   console.log('       Type column value:', manualMeal.type);
 
-  // 3. Test AI Image Recognition - prisma.meal.create with type
-  console.log('\n--- Testing Feature 2: AI Image Recognition pipeline ---');
-  const aiMeal = await prisma.meal.create({
-    data: {
-      name: 'Verification Pounded Yam & Egusi Soup',
-      calories: 820,
-      protein: 32,
-      carbs: 110,
-      fat: 28,
-      imageUrl: null,
-      type: 'Lunch',
-      userId: user.id
-    }
-  });
-  console.log('[PASS] AI Image Recognition Meal Created successfully with ID:', aiMeal.id);
-  console.log('       Type column value:', aiMeal.type);
-
-  // 4. Test Barcode Scanner - prisma.meal.create with type
-  console.log('\n--- Testing Feature 3: Barcode Scanner pipeline ---');
-  const barcodeMeal = await prisma.meal.create({
-    data: {
-      name: 'Verification Milo Chocolate Malt (Nestle)',
-      calories: 140,
-      protein: 5,
-      carbs: 22,
-      fat: 3,
-      imageUrl: 'https://images.openfoodfacts.org/images/products/test.jpg',
-      type: 'Snack',
-      userId: user.id
-    }
-  });
-  console.log('[PASS] Barcode Scanner Meal Created successfully with ID:', barcodeMeal.id);
-  console.log('       Type column value:', barcodeMeal.type);
 
   // 5. Test Meal History / Fetching - prisma.meal.findMany
   console.log('\n--- Testing Feature 4: Meal History & Querying ---');

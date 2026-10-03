@@ -146,8 +146,10 @@ export default function Profile() {
   const handlePlanActivated = (updatedUser) => {
     setLocalUser(updatedUser)
     setUser(updatedUser)
+    useTrackingStore.getState().setAiMealPlan(null)
+    useTrackingStore.getState().setLastFetchedDate(null)
     setShowNewPlanWizard(false)
-    navigate('/home', { state: { showWelcomeModal: true, newPlanStarted: true } })
+    navigate('/home', { state: { showWelcomeModal: true, newPlanStarted: true, timestamp: Date.now() } })
   }
 
   const displayUser = user || storeUser

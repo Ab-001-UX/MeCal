@@ -352,18 +352,24 @@ export async function updateProfile(req, res) {
         ...data
       }
       
-      // Dynamic recalculations
-      data.calorieGoal = calculateCalorieGoal(mergedProfile);
-      data.stepGoal = getStepGoal(mergedProfile.activityLevel);
+      // Dynamic recalculations: only calculate if not explicitly provided
+      if (data.calorieGoal === undefined || data.calorieGoal === null) {
+        data.calorieGoal = calculateCalorieGoal(mergedProfile);
+      }
+      if (data.stepGoal === undefined || data.stepGoal === null) {
+        data.stepGoal = getStepGoal(mergedProfile.activityLevel);
+      }
 
-      const weightKg = mergedProfile.unitPreference === 'imperial' 
-        ? (mergedProfile.weight || 70) * 0.453592 
-        : (mergedProfile.weight || 70);
-      const activityOffset = mergedProfile.activityLevel === 'active' ? 1000 : mergedProfile.activityLevel === 'moderate' ? 500 : 0;
-      const targetWaterMl = weightKg * 35 + activityOffset;
-      const capacity = mergedProfile.waterPreference === 'bottle' ? 750 : 500;
-      const calculatedWaterGoal = Math.ceil(targetWaterMl / capacity);
-      data.waterGoal = Math.max(mergedProfile.waterPreference === 'bottle' ? 4 : 5, calculatedWaterGoal);
+      if (data.waterGoal === undefined || data.waterGoal === null) {
+        const weightKg = mergedProfile.unitPreference === 'imperial' 
+          ? (mergedProfile.weight || 70) * 0.453592 
+          : (mergedProfile.weight || 70);
+        const activityOffset = mergedProfile.activityLevel === 'active' ? 1000 : mergedProfile.activityLevel === 'moderate' ? 500 : 0;
+        const targetWaterMl = weightKg * 35 + activityOffset;
+        const capacity = mergedProfile.waterPreference === 'bottle' ? 750 : 500;
+        const calculatedWaterGoal = Math.ceil(targetWaterMl / capacity);
+        data.waterGoal = Math.max(mergedProfile.waterPreference === 'bottle' ? 4 : 5, calculatedWaterGoal);
+      }
     }
 
     const user = await prisma.user.update({

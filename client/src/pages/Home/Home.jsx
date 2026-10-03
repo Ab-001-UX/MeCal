@@ -737,10 +737,14 @@ export default function Home() {
   const isPastDay = selectedDay < currentProgramDay
 
   useEffect(() => {
-    if (user?.createdAt) {
+    if (location.state?.newPlanStarted) {
+      setSelectedDay(1)
+      setAiMealPlan(null)
+      setLastFetchedDate(null)
+    } else if (user?.createdAt) {
       setSelectedDay(getProgramDay(user.createdAt))
     }
-  }, [user?.createdAt])
+  }, [user?.createdAt, location.state?.newPlanStarted, location.state?.timestamp])
 
   useEffect(() => {
     if (activeDayRef.current) {
@@ -812,7 +816,7 @@ export default function Home() {
       triggerConfetti()
       window.history.replaceState({}, document.title)
     }
-  }, [location.state, language, selectedDay, user?.createdAt])
+  }, [location.state, language, selectedDay, user?.createdAt, user?.goal, user?.calorieGoal, user?.stepGoal, user?.waterGoal])
 
   const fetchAiRecommendations = async (dateStr, dayNum) => {
     try {
@@ -1108,7 +1112,7 @@ export default function Home() {
   const totalCarbs = displayMeals.reduce((sum, meal) => sum + (meal.carbs || 0), 0)
   
   const dynamicGoals = getDynamicCalorieAndMacroGoals(displayUser)
-  const calorieGoal = aiMealPlan?.calorieGoal || displayUser?.calorieGoal || dynamicGoals.calorieGoal
+  const calorieGoal = displayUser?.calorieGoal || aiMealPlan?.calorieGoal || dynamicGoals.calorieGoal
   const carbsGoal = Math.round((calorieGoal * 0.50) / 4)
   const proteinGoal = Math.round((calorieGoal * 0.25) / 4)
   const fatGoal = Math.round((calorieGoal * 0.25) / 9)
@@ -1129,13 +1133,13 @@ export default function Home() {
   const waterItemCapacity = waterPreference === 'sachet' ? 500 : 750
   const savedPreference = displayUser?.waterPreference || 'sachet'
   const savedCapacity = (savedPreference === 'bottle' || savedPreference === 'both') ? 750 : 500
-  const waterGoal = aiMealPlan?.waterGoalMl 
-    ? aiMealPlan.waterGoalMl 
-    : (displayUser?.waterGoal ? displayUser.waterGoal * savedCapacity : getDynamicWaterGoal(displayUser))
+  const waterGoal = displayUser?.waterGoal 
+    ? displayUser.waterGoal * savedCapacity 
+    : (aiMealPlan?.waterGoalMl || getDynamicWaterGoal(displayUser))
   const waterTotalItemsNeeded = Math.ceil(waterGoal / waterItemCapacity)
   const hydrationProgress = Math.min((water / waterGoal) * 100, 100)
 
-  const stepsGoal = aiMealPlan?.stepGoal || displayUser?.stepGoal || getDynamicStepsGoal(displayUser)
+  const stepsGoal = displayUser?.stepGoal || aiMealPlan?.stepGoal || getDynamicStepsGoal(displayUser)
   const stepProgress = stepGoalHit === true ? 100 : 0
 
   const movementProgress = dailyPlan?.plan?.some((meal) => isMealLogged(meal.name)) ? 100 : 0
@@ -1875,7 +1879,7 @@ export default function Home() {
                   type="text" 
                   value={editName} 
                   onChange={e => setEditName(e.target.value)} 
-                  style={{ width: '100%', border: '1px solid #E0E0E0', background: '#F9F9F9', borderRadius: '10px', padding: '10px 12px', boxSizing: 'border-box', outline: 'none' }}
+                  style={{ width: '100%', minHeight: '52px', height: '52px', border: '1.5px solid #E0E0E0', background: '#F9F9F9', borderRadius: '14px', padding: '0 16px', boxSizing: 'border-box', outline: 'none', fontSize: '15px' }}
                 />
               </div>
 
@@ -1886,7 +1890,7 @@ export default function Home() {
                 <select
                   value={editType}
                   onChange={e => setEditType(e.target.value)}
-                  style={{ width: '100%', border: '1px solid #E0E0E0', background: '#F9F9F9', borderRadius: '10px', padding: '10px 12px', boxSizing: 'border-box', outline: 'none', fontSize: '14px' }}
+                  style={{ width: '100%', minHeight: '52px', height: '52px', border: '1.5px solid #E0E0E0', background: '#F9F9F9', borderRadius: '14px', padding: '0 16px', boxSizing: 'border-box', outline: 'none', fontSize: '15px' }}
                 >
                   <option value="breakfast">{currentCulture === 'fr' ? '🍳 Petit-déjeuner' : '🍳 Breakfast'}</option>
                   <option value="lunch">{currentCulture === 'fr' ? '🍛 Déjeuner' : '🍛 Lunch'}</option>

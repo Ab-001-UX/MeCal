@@ -55,10 +55,19 @@ export async function clearUserRecommendationCache(userId) {
   }
   if (redis) {
     try {
+      // Proactively delete today and surrounding dates directly
+      const today = new Date()
+      const directKeys = []
+      for (let offset = -7; offset <= 7; offset++) {
+        const d = new Date(today.getTime() + offset * 86400000).toISOString().slice(0, 10)
+        directKeys.push(`recs:${userId}:${d}`)
+      }
+      await Promise.all(directKeys.map(k => redis.del(k).catch(() => {})))
+
       const pattern = `recs:${userId}:*`
-      const keys = await redis.keys(pattern)
+      const keys = await redis.keys(pattern).catch(() => [])
       if (keys && keys.length > 0) {
-        await Promise.all(keys.map(k => redis.del(k)))
+        await Promise.all(keys.map(k => redis.del(k).catch(() => {})))
       }
     } catch (err) {
       console.warn('Failed to clear redis cache for user:', err.message)

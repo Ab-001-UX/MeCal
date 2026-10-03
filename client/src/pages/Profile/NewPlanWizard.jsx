@@ -127,6 +127,10 @@ export default function NewPlanWizard({ isOpen, onClose, user, currentCulture, o
     setSaving(true)
     setErrorMsg('')
     try {
+      const calcCalories = summaryData?.calorieGoal || (form.goal === 'lose' ? 1800 : form.goal === 'gain' ? 2500 : 2075)
+      const calcWater = summaryData?.waterGoal || (form.waterPreference === 'bottle' ? 4 : 5)
+      const calcSteps = summaryData?.stepGoal || (form.activityLevel === 'active' ? 10000 : form.activityLevel === 'low' ? 5000 : 7500)
+
       const payload = {
         ...form,
         targetDuration: form.targetDuration === 'custom' ? form.customTargetDuration : form.targetDuration,
@@ -134,9 +138,9 @@ export default function NewPlanWizard({ isOpen, onClose, user, currentCulture, o
         height: form.height ? parseFloat(form.height) : null,
         weight: form.weight ? parseFloat(form.weight) : null,
         targetWeight: form.targetWeight ? parseFloat(form.targetWeight) : null,
-        calorieGoal: summaryData?.calorieGoal || null,
-        waterGoal: summaryData?.waterGoal || null,
-        stepGoal: summaryData?.stepGoal || null,
+        calorieGoal: calcCalories,
+        waterGoal: calcWater,
+        stepGoal: calcSteps,
         resetPlan: true // Tells backend to reset createdAt to now & invalidate recommendations cache!
       }
 
@@ -514,19 +518,45 @@ export default function NewPlanWizard({ isOpen, onClose, user, currentCulture, o
                 <div className={styles.summaryBox}>
                   <div className={styles.summaryTargetsGrid}>
                     <div className={styles.summaryTargetCard}>
-                      <span className={styles.targetLabel}>{isFr ? 'Calories' : 'Calories'}</span>
-                      <span className={styles.targetVal}>{summaryData?.calorieGoal || 2000}</span>
-                      <span className={styles.targetUnit}>kcal / {isFr ? 'jour' : 'day'}</span>
+                      <div className={styles.targetCardLeft}>
+                        <span className={styles.targetIcon}>🔥</span>
+                        <div className={styles.targetCardInfo}>
+                          <span className={styles.targetLabel}>{isFr ? 'Calories cibles' : 'Calories'}</span>
+                          <span className={styles.targetSub}>{isFr ? 'Dépense quotidienne calibrée' : 'Daily energy target'}</span>
+                        </div>
+                      </div>
+                      <div className={styles.targetCardRight}>
+                        <span className={styles.targetVal}>{summaryData?.calorieGoal || 2000}</span>
+                        <span className={styles.targetUnit}>kcal / {isFr ? 'jour' : 'day'}</span>
+                      </div>
                     </div>
+
                     <div className={styles.summaryTargetCard}>
-                      <span className={styles.targetLabel}>{isFr ? 'Eau' : 'Hydration'}</span>
-                      <span className={styles.targetVal}>{summaryData?.waterGoal || 6}</span>
-                      <span className={styles.targetUnit}>{form.waterPreference === 'bottle' ? (isFr ? 'bouteilles' : 'bottles') : (isFr ? 'sachets' : 'sachets')}</span>
+                      <div className={styles.targetCardLeft}>
+                        <span className={styles.targetIcon}>💧</span>
+                        <div className={styles.targetCardInfo}>
+                          <span className={styles.targetLabel}>{isFr ? 'Hydratation' : 'Hydration'}</span>
+                          <span className={styles.targetSub}>{form.waterPreference === 'bottle' ? (isFr ? 'Bouteilles d’eau (750ml)' : 'Water bottles (750ml)') : (isFr ? 'Sachets d’eau pure (500ml)' : 'Pure water sachets (500ml)')}</span>
+                        </div>
+                      </div>
+                      <div className={styles.targetCardRight}>
+                        <span className={styles.targetVal}>{summaryData?.waterGoal || 6}</span>
+                        <span className={styles.targetUnit}>{form.waterPreference === 'bottle' ? (isFr ? 'bouteilles / jour' : 'bottles / day') : (isFr ? 'sachets / jour' : 'sachets / day')}</span>
+                      </div>
                     </div>
+
                     <div className={styles.summaryTargetCard}>
-                      <span className={styles.targetLabel}>{isFr ? 'Pas' : 'Steps'}</span>
-                      <span className={styles.targetVal}>{(summaryData?.stepGoal || 8000).toLocaleString()}</span>
-                      <span className={styles.targetUnit}>{isFr ? 'pas / jour' : 'steps / day'}</span>
+                      <div className={styles.targetCardLeft}>
+                        <span className={styles.targetIcon}>👟</span>
+                        <div className={styles.targetCardInfo}>
+                          <span className={styles.targetLabel}>{isFr ? 'Objectif de pas' : 'Steps'}</span>
+                          <span className={styles.targetSub}>{isFr ? 'Activité physique quotidienne' : 'Daily walking activity'}</span>
+                        </div>
+                      </div>
+                      <div className={styles.targetCardRight}>
+                        <span className={styles.targetVal}>{(summaryData?.stepGoal || 8000).toLocaleString()}</span>
+                        <span className={styles.targetUnit}>{isFr ? 'pas / jour' : 'steps / day'}</span>
+                      </div>
                     </div>
                   </div>
 

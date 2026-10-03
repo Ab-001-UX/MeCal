@@ -9,7 +9,7 @@ async function callGemini(prompt, retries = 2) {
     return await callGroq(prompt);
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`;
   const payload = { contents: [{ parts: [{ text: prompt }] }] };
 
   let lastError = null;
@@ -257,22 +257,27 @@ export async function getDailyMealPlan(profile, lang = 'en', dateStr = null, day
     const prompt = `
       Today's Date: ${todayDate.toDateString()} (${dayOfWeek})
       Generate a personalized daily nutrition, hydration, and activity blueprint for this user in ${lang === 'fr' ? 'French' : 'English'}.
+      User Goal: ${(profile.goal || 'maintain').toUpperCase()} (Current Weight: ${profile.weight || 70}kg, Target Weight: ${profile.targetWeight || profile.weight || 70}kg)
+      Lifestyle: ${profile.lifestyleType || 'mixed'}, Activity: ${profile.activityLevel || 'moderate'}, Country: ${profile.country || 'Nigeria'}, Tribe: ${profile.tribe || 'General'}
       Profile: ${JSON.stringify(profile)}
       Allergies to avoid: ${JSON.stringify(profile.allergies || [])}
       Other allergies: ${profile.otherAllergies || 'none'}
       
-      Baseline Targets:
+      Plan Targets:
       - Daily Calorie Target: ${calorieTarget} kcal
       - Daily Water Target: ${waterTargetMl} ml
       - Daily Step Target: ${stepTarget} steps
 
+      NUTRITION FOCUS BASED ON GOAL:
+      - If Goal is 'lose': Choose lighter, highly satiating, fiber-rich local meals with lean protein. Calorie total should stay around ${calorieTarget} kcal.
+      - If Goal is 'gain': Choose nutrient-dense, protein-rich staples and healthy calorie sources. Calorie total should stay around ${calorieTarget} kcal.
+      - If Goal is 'maintain': Balance macros cleanly around ${calorieTarget} kcal.
+
       CRUCIAL ROTATION REQUIREMENT FOR VARIETY:
       Today is ${dayOfWeek}. DO NOT recommend the exact same food items, fruits, or snacks as yesterday or previous days!
       You MUST rotate fruits and meals daily:
-      - Rotate fruits: Choose a fruit recommendation appropriate for ${dayOfWeek} from a rich variety (e.g. Watermelon, Cucumber & Garden Eggs, Grapefruit, Pawpaw/Papaya, Star Apple/Agbalumo, Oranges, Guava, Bananas, Coconut, Mango, Pineapple, Avocado).
-      - Rotate meals: Explore a wide variety of West African meals (e.g., Ewa Agoyin, Yam Porridge, Plantain Frittata, Bole, Abacha, Masa, Kunun, Tuwo Shinkafa, Thieboudienne, Garba, Jollof Rice, Ogi/Akara, Amala/Ewedu, etc.).
-      
-      Please customize and return appropriate targets for today. They should vary slightly from the baseline to feel organic, realistic, and dynamic (e.g. within +/- 10% of baselines based on their country, tribe, and selected lifestyle).
+      - Rotate fruits: Choose a fruit recommendation appropriate for ${dayOfWeek} and the user's goal (e.g. Watermelon, Cucumber, Papaya, Grapefruit for weight loss; Bananas, Avocado, Dates, Mango for weight gain).
+      - Rotate meals: Explore authentic West African meals tailored to their country and tribe.
       
       Generate:
       1. 3 culturally appropriate meals (light, medium, heavy) that sum up approximately to today's calorie goal:

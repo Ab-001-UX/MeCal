@@ -419,16 +419,18 @@
 }
 
 .formInput, .formSelect {
-  height: 44px;
+  min-height: 52px;
+  height: 52px;
   box-sizing: border-box;
-  padding: 10px 12px;
-  border: 1px solid #E0E0E0;
-  border-radius: 8px; /* Square/rectangular shape */
-  font-size: 14px;
+  padding: 0 16px;
+  border: 1.5px solid #E0E0E0;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 500;
   background: #F9F9F9;
   color: #121212;
   outline: none;
-  transition: border-color 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .formInput::placeholder {
@@ -444,15 +446,17 @@
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23757575' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23555555' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 16px center;
-  background-size: 16px;
-  padding-right: 40px !important;
+  background-size: 18px;
+  padding-right: 44px !important;
+  cursor: pointer;
 }
 
 .formInput:focus, .formSelect:focus {
   border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.12);
 }
 
 .formRow {

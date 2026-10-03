@@ -1368,7 +1368,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Mindful Scanner */}
+          {/* Mindful Logger */}
           <div className={`${styles.milestoneChip} ${meals.length > 0 ? styles.milestoneChipUnlocked : styles.milestoneChipLocked}`}>
             <span>{meals.length > 0 ? '🥗 ' + t('mindfulScannerTitle') : '🔒 ' + t('mindfulScannerTitle')}</span>
             <div className={styles.milestoneTooltip}>

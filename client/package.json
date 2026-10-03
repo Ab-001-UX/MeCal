@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@sentry/react": "^10.56.0",
-    "@zxing/library": "^0.21.3",
     "axios": "^1.16.0",
     "dompurify": "^3.4.8",
     "i18next": "^26.2.0",
